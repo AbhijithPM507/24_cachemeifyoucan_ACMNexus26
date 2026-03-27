@@ -2,6 +2,8 @@ import os
 import sys
 import json
 import time
+import pandas as pd
+import pydeck as pdk
 import streamlit as st
 from pathlib import Path
 
@@ -19,6 +21,22 @@ SCOUT_PATH = SHARED_DIR / "scout_output.json"
 ANALYST_PATH = SHARED_DIR / "analyst_output.json"
 INTEL_PATH = SHARED_DIR / "intel_output.json"
 FINAL_RESULTS_PATH = SHARED_DIR / "final_results.json"
+
+KERALA_HUBS = {
+    "Kochi": {"lon": 76.2605, "lat": 10.0153},
+    "Thrissur": {"lon": 76.2105, "lat": 10.5276},
+    "Palakkad": {"lon": 76.5214, "lat": 10.7733},
+    "Wayanad": {"lon": 76.1323, "lat": 11.6854},
+    "Kozhikode": {"lon": 75.7772, "lat": 11.2588},
+    "Thiruvananthapuram": {"lon": 76.9728, "lat": 8.4855},
+    "Mumbai": {"lon": 72.8777, "lat": 19.0760},
+    "Bangalore": {"lon": 77.5946, "lat": 12.9716},
+    "Chennai": {"lon": 80.2707, "lat": 13.0827},
+    "Delhi": {"lon": 77.2090, "lat": 28.6139},
+    "Hyderabad": {"lon": 78.4867, "lat": 17.3850},
+    "Mangalore": {"lon": 74.8560, "lat": 12.9141},
+    "Cochin Port": {"lon": 76.2619, "lat": 9.9634}
+}
 
 st.set_page_config(page_title="NexusPath Dashboard", layout="wide", initial_sidebar_state="expanded")
 
@@ -243,8 +261,61 @@ def inject_custom_css():
             border-top: 1px solid #334155;
             padding-top: 1rem;
         }
+        
+        /* Map Container */
+        .map-container {
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid #1f2937;
+            margin-top: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
         </style>
     """, unsafe_allow_html=True)
+
+def render_map(location_name):
+    """Renders a 3D Pydeck map tracking the disruption location."""
+    if location_name not in KERALA_HUBS:
+        return
+        
+    coords = KERALA_HUBS[location_name]
+    df = pd.DataFrame([coords])
+    
+    st.markdown('<h3 style="color: #94a3b8; font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1.5rem; margin-bottom: 0.5rem;">📍 Threat Topography</h3>', unsafe_allow_html=True)
+    st.markdown('<div class="map-container">', unsafe_allow_html=True)
+    
+    layer = pdk.Layer(
+        'ScatterplotLayer',
+        data=df,
+        get_position='[lon, lat]',
+        get_color='[220, 38, 38, 180]',
+        get_radius=25000,
+        pickable=True
+    )
+    
+    glow_layer = pdk.Layer(
+        'ScatterplotLayer',
+        data=df,
+        get_position='[lon, lat]',
+        get_color='[239, 68, 68, 80]',
+        get_radius=50000,
+    )
+    
+    view_state = pdk.ViewState(
+        latitude=coords['lat'],
+        longitude=coords['lon'],
+        zoom=5.5,
+        pitch=45,
+    )
+    
+    r = pdk.Deck(
+        map_style='mapbox://styles/mapbox/dark-v11',
+        layers=[glow_layer, layer],
+        initial_view_state=view_state,
+        tooltip={"text": f"⚠️ Disruption Zone: {location_name}"}
+    )
+    st.pydeck_chart(r)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------
 # APP LAYOUT
@@ -350,6 +421,7 @@ with col_left:
     final_res = load_json(FINAL_RESULTS_PATH)
     intel_data = load_json(INTEL_PATH)
     analyst_data = load_json(ANALYST_PATH)
+    scout_data = load_json(SCOUT_PATH)
     
     if final_res:
         # --- PHASE 4: MANAGER 
@@ -409,6 +481,11 @@ with col_left:
         
     st.markdown("</div>", unsafe_allow_html=True)
 
+    # Render the dynamic 3D Map if we have a disruption location pinned
+    if scout_data:
+        loc = scout_data.get("location")
+        if loc:
+            render_map(loc)
 
 with col_right:
     # --- AGENT INTELLIGENCE FEED ---
