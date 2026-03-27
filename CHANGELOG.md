@@ -352,3 +352,18 @@
 ### Issues Faced
 - **Groq Rate Limit Exceeded**: The 70B model reached daily token capacity mid-demonstration; resolved by switching to the faster, more flexible 8B-instant model.
 - **Path Resolution Errors**: Standard cross-module imports were failing during Streamlit execution; patched with absolute `sys.path` injections and module-level `os.path` normalization.
+
+
+## 00:00 (Final Release)
+
+### Features Added
+- Finalized Dashboard UI polish: Corrected "Master Reset" placement in the sidebar and ensured "Guided Demo Mode" defaults to ON for the jury presentation.
+- Verified end-to-end ROI logic: Confirmed the Analyst (Value at Risk) to Manager (Net Savings) financial handoff accuracy.
+- Enforced a zero-state baseline: Purged all legacy `shared_exchange` JSONs and audio artifacts to ensure the first project trigger is fresh.
+
+### Files Modified
+- `01_scout_module/dashboard.py`
+- `CHANGELOG.md`
+
+### Issues Faced
+- **UI Reset Stall**: The Reset button was initially failing to clear nested file system glob patterns for MP3s; patched with absolute `Path` normalization.

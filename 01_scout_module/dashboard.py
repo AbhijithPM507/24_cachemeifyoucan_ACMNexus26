@@ -324,8 +324,25 @@ inject_custom_css()
 
 # --- SIDEBAR DEMO MODE ---
 st.sidebar.title("System Parameters")
-demo_mode = st.sidebar.toggle("🎬 Enable Guided Demo Mode", value=False)
+demo_mode = st.sidebar.toggle("🎬 Enable Guided Demo Mode", value=True)
 st.session_state.auto_refresh = st.sidebar.checkbox("Auto-Refresh UI (3s)", value=True)
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("System Recovery")
+if st.sidebar.button("🧹 Master Reset", use_container_width=True):
+    # Full purge across all modules
+    for p in [SCOUT_PATH, ANALYST_PATH, INTEL_PATH, FINAL_RESULTS_PATH, SHARED_DIR / "signal.json"]:
+        if p.exists(): p.unlink()
+        
+    # Clean Manager audio
+    for f in (BASE_DIR / "04_manager_module").glob("*.mp3"):
+        f.unlink()
+            
+    st.sidebar.success("System Purged. Re-initializing...")
+    time.sleep(1)
+    st.rerun()
+
+st.sidebar.markdown("---")
 
 # SECTION 1: HEADER
 st.markdown('<h1 class="title-glow">🛰️ NexusPath — Antifragile Supply Chain</h1>', unsafe_allow_html=True)
