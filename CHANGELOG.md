@@ -1,3 +1,23 @@
+## 04:04
+
+### Features Added
+
+- **Route Configuration Panel**: Added Origin & Destination hub selectors inline above the map; selections now persist through chaos injection via stable `route_origin`/`route_dest` session state keys decoupled from widget keys
+- **Disruption Alert Card**: Live card above the map shows event type, affected zone, severity badge (with pulsing dot animation), event ID, source system, detection timestamp, and AI impact summary when a chaos event is active
+- **Accurate Railway Paths**: Replaced OSRM road proxy for RAIL mode with a dedicated `RAIL_SPINES` dictionary mapping actual Southern Railway / Konkan Railway station waypoints (Ernakulam → Thrissur → Shoranur → Kozhikode → Kannur → Kasaragod → Mangalore; inter-state via Coimbatore → Bangalore/Chennai; Konkan Railway to Mumbai); also calculates distance and estimated duration at 65 km/h freight speed
+- **Dual-Route Rerouting Colors**: Old compromised route shown as dimmed red ghost (alpha 70/255); new AI-recommended route shown as solid bright green — universal red/green signal regardless of transport mode
+- **`normalize_mode()` helper**: Parses verbose AI-generated mode strings like `"RAIL CARGO CORRIDOR VIA INLAND RAIL NETWORK"` → `"RAIL"` for reliable routing and coloring
+- **Minimum-distance Guard**: If disruption location is within 30 km of origin, map auto-selects `Kozhikode` as fallback to prevent invisible zero-length routes
+- **Fixed HTML rendering bug**: Disruption card previously rendered as raw HTML text; fixed by pre-computing all conditional HTML fragments as Python variables before the f-string
+
+### Files Modified
+
+- `01_scout_module/dashboard.py`
+
+### Issues Faced
+
+- Streamlit f-strings with Python ternary operators containing HTML strings cause the renderer to escape and display raw HTML — resolved by pre-building string fragments outside the f-string template
+
 ## 09:00
 
 ### Features Added
