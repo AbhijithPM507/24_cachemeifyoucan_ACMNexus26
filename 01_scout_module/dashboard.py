@@ -5,6 +5,7 @@ import time
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
+import requests
 from pathlib import Path
 
 # Add the current directory to path so we can import local modules easily
@@ -203,112 +204,64 @@ def inject_custom_css():
         </style>
     """, unsafe_allow_html=True)
 
+@st.cache_data(ttl=600)
+def get_real_route(origin, dest):
+    """Fetches real GeoJSON road coordinates from OSRM Engine."""
+    try:
+        url = f"http://router.project-osrm.org/route/v1/driving/{origin[0]},{origin[1]};{dest[0]},{dest[1]}?geometries=geojson&overview=full"
+        res = requests.get(url, timeout=5)
+        data = res.json()
+        if data["code"] == "Ok":
+            route = data["routes"][0]
+            dist = route["distance"] / 1000
+            dur = route["duration"] / 3600
+            return route["geometry"]["coordinates"], dist, dur
+    except:
+        pass
+    return [origin, dest], 0, 0
+
 def get_detailed_path(start, end, mode, location_name):
     """Generates a high-fidelity multi-segment path simulation for logistics routes."""
-    # Predefined 'Spine Waypoints' for Kerala/India Logistics Corridors
+    # Use real OSRM road data for Truck and Rail (proxy)
+    if mode in ["TRUCK", "RAIL"]:
+        path, d, t = get_real_route(start, end)
+        if d > 0: return path, d, t
+        
+    # Predefined 'Spine Waypoints' Fallback
     SPINES = {
-        "Mumbai": [
-            [72.87, 19.07], # Mumbai
-            [73.85, 18.52], # Pune
-            [73.98, 15.29], # Goa
-            [74.85, 12.91], # Mangalore
-            [76.26, 9.96]   # Cochin Port
-        ],
-        "Bangalore": [
-            [77.59, 12.97], # Bangalore
-            [78.14, 11.66], # Salem
-            [76.52, 10.77], # Palakkad
-            [76.21, 10.52], # Thrissur
-            [76.26, 9.96]   # Cochin Port
-        ],
-        "Chennai": [
-            [80.27, 13.08], # Chennai
-            [79.13, 12.91], # Vellore
-            [78.14, 11.66], # Salem
-            [76.52, 10.77], # Palakkad
-            [76.26, 9.96]   # Cochin Port
-        ],
-        "Thiruvananthapuram": [
-            [76.97, 8.48],  # TVM
-            [76.60, 8.89],  # Kollam
-            [76.33, 9.49],  # Alappuzha
-            [76.26, 9.96]   # Cochin Port
-        ]
+        "Mumbai": [[72.87,19.07],[73.85,18.52],[73.98,15.29],[74.85,12.91],[76.26,9.96]],
+        "Bangalore": [[77.59,12.97],[78.14,11.66],[76.52,10.77],[76.21,10.52],[76.26,9.96]],
+        "Chennai": [[80.27,13.08],[79.13,12.91],[78.14,11.66],[76.52,10.77],[76.26,9.96]],
+        "Thiruvananthapuram": [[76.97,8.48],[76.60,8.89],[76.33,9.49],[76.26,9.96]]
     }
     
-    # If route is unknown, provide a 'Bypass' jittered path to look 'detailed'
-    if location_name in SPINES:
-        path = SPINES[location_name]
-    else:
-        # Default with a slight "logistics curve"
-        mid_lon = (start[0] + end[0]) / 2 + 0.1
-        mid_lat = (start[1] + end[1]) / 2 + 0.05
-        path = [start, [mid_lon, mid_lat], end]
-
+    path = SPINES.get(location_name, [start, end])
     if mode == "SHIP":
-        # Maritime route must stay in the West Sea
-        maritime_path = [[start[0], start[1]]]
-        for wp in path[1:-1]:
-            maritime_path.append([wp[0] - 1.2, wp[1]]) # Offset way out into sea
-        maritime_path.append([end[0], end[1]])
-        return maritime_path
-    
-    if mode == "AIR":
-        # Direct flight vectors
-        return [start, end]
-        
-    return path
+        m_path = [[start[0], start[1]]]
+        for wp in path[1:-1]: m_path.append([wp[0] - 1.2, wp[1]])
+        m_path.append([end[0], end[1]])
+        return m_path, 0, 0
+    return path, 0, 0
 
 def render_map(location_name, severity="HIGH"):
     """Renders a high-fidelity interactive mult-mode logistics map."""
     start_loc = KERALA_HUBS.get("Cochin Port")
     end_loc = KERALA_HUBS.get(location_name) if location_name in KERALA_HUBS else KERALA_HUBS.get("Kochi")
-    
-    # Mode selection from session state
     mode = st.session_state.get("selected_mode", "TRUCK")
     
-    colors = {
-        "LOW": [34, 197, 94, 200],
-        "MEDIUM": [234, 179, 8, 200],
-        "HIGH": [249, 115, 22, 200],
-        "CRITICAL": [239, 68, 68, 255]
-    }
+    colors = {"LOW":[34,197,94,200],"MEDIUM":[234,179,8,200],"HIGH":[249,115,22,200],"CRITICAL":[239,68,68,255]}
     base_color = colors.get(severity.upper(), colors["HIGH"])
     
-    # Get high-fidelity simulated road/path
-    path_data = get_detailed_path([start_loc["lon"], start_loc["lat"]], [end_loc["lon"], end_loc["lat"]], mode, location_name)
+    path_data, osrm_dist, osrm_dur = get_detailed_path([start_loc["lon"], start_loc["lat"]], [end_loc["lon"], end_loc["lat"]], mode, location_name)
     
-    mode_colors = {
-        "SHIP": [30, 64, 175, 255], # Deep Blue
-        "AIR": [6, 182, 212, 255],  # Cyan
-        "RAIL": [71, 85, 105, 255], # Slate
-        "TRUCK": base_color
-    }
+    mode_colors = {"SHIP":[30,64,175,255],"AIR":[6,182,212,255],"RAIL":[71,85,105,255],"TRUCK":base_color}
     mode_color = mode_colors.get(mode, base_color)
 
-    route_df = pd.DataFrame([{"path": path_data}])
-    marker_df = pd.DataFrame([
-        {"lon": start_loc["lon"], "lat": start_loc["lat"], "tag": "ORIGIN"},
-        {"lon": end_loc["lon"], "lat": end_loc["lat"], "tag": "DISRUPTION SITE"}
-    ])
+    route_layer = pdk.Layer("PathLayer", pd.DataFrame([{"path": path_data}]), get_path="path", get_color=mode_color, width_scale=10, width_min_pixels=6, rounded=True)
+    marker_layer = pdk.Layer("ScatterplotLayer", pd.DataFrame([{"lon":start_loc["lon"],"lat":start_loc["lat"]},{"lon":end_loc["lon"],"lat":end_loc["lat"]}]), get_position="[lon, lat]", get_color="[255,255,255,255]", get_radius=2000)
+    glow_layer = pdk.Layer("ScatterplotLayer", pd.DataFrame([{"lon":start_loc["lon"],"lat":start_loc["lat"]},{"lon":end_loc["lon"],"lat":end_loc["lat"]}]), get_position="[lon, lat]", get_color=mode_color, get_radius=5000, opacity=0.3)
 
-    route_layer = pdk.Layer(
-        "PathLayer", route_df, get_path="path", get_color=mode_color, 
-        width_scale=10, width_min_pixels=6, rounded=True, pickable=True
-    )
-    marker_layer = pdk.Layer("ScatterplotLayer", marker_df, get_position="[lon, lat]", get_color="[255, 255, 255, 255]", get_radius=2000)
-    glow_layer = pdk.Layer("ScatterplotLayer", marker_df, get_position="[lon, lat]", get_color=mode_color, get_radius=5000, opacity=0.3)
-
-    view_state = pdk.ViewState(
-        latitude=(start_loc["lat"] + end_loc["lat"]) / 2,
-        longitude=(start_loc["lon"] + end_loc["lon"]) / 2,
-        zoom=7 if mode in ["SHIP", "AIR"] else 9, pitch=45
-    )
-
-    overlay_layer = pdk.Layer(
-        "PolygonLayer", pd.DataFrame([{"path": [[0,0], [180, 0], [180, 90], [0, 90], [0,0]], "color": [88, 28, 135, 30]}]),
-        get_polygon="path", get_fill_color="color", stroked=False,
-    )
+    overlay_layer = pdk.Layer("PolygonLayer", pd.DataFrame([{"path": [[0,0], [180, 0], [180, 90], [0, 90], [0,0]], "color": [88, 28, 135, 30]}]), get_polygon="path", get_fill_color="color", stroked=False)
 
     from math import radians, cos, sin, asin, sqrt
     def haversine(lon1, lat1, lon2, lat2):
@@ -317,27 +270,31 @@ def render_map(location_name, severity="HIGH"):
         a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
         return 6371 * 2 * asin(sqrt(a))
     
-    dist = haversine(start_loc["lon"], start_loc["lat"], end_loc["lon"], end_loc["lat"])
-    
+    v_dist = haversine(start_loc["lon"], start_loc["lat"], end_loc["lon"], end_loc["lat"])
+    # If OSRM failed or it's a non-road mode, use haversine for display
+    display_dist = osrm_dist if osrm_dist > 0 else v_dist
+
     st.markdown(f'<h3 class="title-glow" style="font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1.5rem; margin-bottom: 0.5rem;">📍 Logistics Corridor: {mode}</h3>', unsafe_allow_html=True)
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
-    st.pydeck_chart(pdk.Deck(map_style=None, layers=[overlay_layer, glow_layer, route_layer, marker_layer], initial_view_state=view_state))
+    st.pydeck_chart(pdk.Deck(map_style=None, layers=[overlay_layer, glow_layer, route_layer, marker_layer], initial_view_state=pdk.ViewState(latitude=(start_loc["lat"]+end_loc["lat"])/2, longitude=(start_loc["lon"]+end_loc["lon"])/2, zoom=7 if mode in ["SHIP","AIR"] else 9, pitch=45)))
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Interactive Selector Plate
+    # Selector Plate
     st.markdown('<div class="info-panel">', unsafe_allow_html=True)
-    modes = [("🚢 SHIP", "SHIP"), ("🚛 TRUCK", "TRUCK"), ("🚆 RAIL", "RAIL"), ("✈️ AIR", "AIR")]
+    modes = [("🚢 SHIP","SHIP"), ("🚛 TRUCK","TRUCK"), ("🚆 RAIL","RAIL"), ("✈️ AIR","AIR")]
     cols = st.columns(len(modes) + 1)
-    
     with cols[0]:
-        st.markdown(f'<div style="text-align:center"><div class="info-lab">Distance</div><div class="info-val">{dist:.1f}</div><div class="info-lab">KM</div></div>', unsafe_allow_html=True)
-    
+        st.markdown(f'<div style="text-align:center"><div class="info-lab">Distance</div><div class="info-val">{display_dist:.1f}</div><div class="info-lab">KM</div></div>', unsafe_allow_html=True)
     for i, (label, m_id) in enumerate(modes):
         with cols[i+1]:
             if st.button(label, key=f"btn_{m_id}", use_container_width=True):
                 st.session_state.selected_mode = m_id
                 st.rerun()
-    st.markdown('</div><br>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    if osrm_dur > 0 and mode == "TRUCK":
+        st.info(f"🛣️ **Real Route Optimized:** Estimated road duration via Highway Corridors: **{osrm_dur:.1f} hours**.")
+
 
 # -----------------
 # APP LAYOUT

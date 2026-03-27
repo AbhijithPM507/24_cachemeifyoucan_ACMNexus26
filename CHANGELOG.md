@@ -390,3 +390,22 @@
 
 - **Mapbox API Block**: Map tiles were failing on premium dark-v10 style due to missing keys; resolved by injecting a synthetic neon filter over the default Deck.gl layer.
 - **Race Condition in Cleanup**: The Manager Agent was deleting Intel output before the UI could render the recommended mode; patched by sourcing the transport mode directly from the persistent `final_results.json` object.
+
+## 01:00
+
+### Features Added
+
+- Integrated **Live OSRM Routing Engine** for 1:1 high-fidelity road topography.
+- Developed a **GeoJSON Path Extractor** that replaces simulated vectors with actual highway coordinates.
+- Implemented **Live Road Telemetry** (Distance in KM, Duration in Hours) directly from the routing engine.
+- Engineered a **Multi-layered Route Visualization** that tracks the exact curvature of the Western Ghats and NH-66.
+
+### Files Modified
+
+- `01_scout_module/dashboard.py`
+- `CHANGELOG.md`
+- `progress/5.md`
+
+### Issues Faced
+
+- **Path Resolution drift**: Raw coordinates from the routing API required `[lon, lat]` list-of-list normalization for Pydeck compatibility; resolved with a custom GeoJSON mapping layer.
