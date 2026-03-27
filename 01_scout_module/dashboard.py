@@ -705,7 +705,10 @@ if st.sidebar.button("INJECT CHAOS EVENT", use_container_width=True, type="prima
     with st.sidebar.status("Injecting Black Swan Event..."):
         for p in [SCOUT_PATH, ANALYST_PATH, INTEL_PATH, FINAL_RESULTS_PATH, SHARED_DIR / "signal.json"]:
             if p.exists(): p.unlink()
-        event_data = trigger_chaos()
+        
+        # Bind the disruption specifically to the active route!
+        event_data = trigger_chaos(target_locations=[st.session_state.route_origin, st.session_state.route_dest])
+        
         process_signal()
         from analyst_agent import run_analyst_agent
         run_analyst_agent()
