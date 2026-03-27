@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import json
 import os
 import math
@@ -308,13 +309,13 @@ def run_simulator(analyst_output, strategist_output):
         insight = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Simulator: Mode={mode}, mean={sim_result['mean_time']}d, P(arrival)={sim_result['p_arrival_within_target']}, reliability={sim_result['reliability_score']}, green={sim_result['green_score']}"
         agent_thoughts.append(insight)
     
-    system_prompt = "You are a Logistics Simulation Oracle. Run Monte Carlo simulations. Return JSON: {recommended_mode, confidence_score, risk_assessment, reasoning, alternative_modes, best_for}"
+    system_prompt = "You are a Logistics Simulation Oracle analyzing probabilistic delivery scenarios. You have run Monte Carlo simulations for multiple transport modes using real-time OSRM routing data. Your task is to interpret the results and provide strategic recommendations. Analyze considering: 1. Probability of arrival 2. Mean delivery time 3. Reliability score 4. Historical strategic lesson 5. Live OSRM routing data 6. ESG/carbon footprint. Return JSON: { recommended_mode, confidence_score, risk_assessment, reasoning, alternative_modes, best_for }"
 
-    user_prompt = f"Simulate: ANALYST={json.dumps(analyst_output)} STRATEGIST={json.dumps(strategist_output)} OSRM={osrm_data} Results={json.dumps(results)} Modes={priority_modes}"
+    user_prompt = "Simulate this delivery scenario: ANALYST: " + json.dumps(analyst_output) + " STRATEGIST: " + json.dumps(strategist_output) + " OSRM: " + str(osrm_data) + " Via waypoint: " + str(osrm_data_waypoint) + " RESULTS: " + json.dumps(results) + " Modes: " + str(priority_modes) + " Return JSON recommendation."
 
     try:
         chat_completion = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
@@ -335,7 +336,7 @@ def run_simulator(analyst_output, strategist_output):
             "osrm_data_waypoint": osrm_data_waypoint
         }
         
-        insight = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Oracle: {oracle_result.get('recommended_mode')} ({oracle_result.get('confidence_score')})"
+        insight = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Oracle: Recommended {oracle_result.get('recommended_mode')} with {oracle_result.get('confidence_score')} confidence"
         agent_thoughts.append(insight)
         
         return final_output
@@ -359,13 +360,28 @@ def run_simulator(analyst_output, strategist_output):
             "error": str(e)
         }
         
-        insight = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Oracle failed, fallback"
+        insight = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Simulator: Oracle failed, using fallback"
         agent_thoughts.append(insight)
         
         return fallback
 
 if __name__ == "__main__":
-    sample_analyst = {"event_type": "Flood", "location": "NH-66, Kochi", "severity": "HIGH", "origin": "Mumbai", "destination": "Kochi"}
-    sample_strategist = {"matched_event_id": 0, "strategic_lesson": "Rail bypass 4hrs faster", "bias_factor": 1.2}
+    sample_analyst = {
+        "event_type": "Flood",
+        "location": "NH-66, Kochi",
+        "severity": "HIGH",
+        "origin": "Mumbai",
+        "destination": "Kochi"
+    }
+    
+    sample_strategist = {
+        "matched_event_id": 0,
+        "strategic_lesson": "Last time NH-66 flooded, the Rail bypass was 4 hours faster. Consider via Bangalore.",
+        "bias_factor": 1.2
+    }
+    
     result = run_simulator(sample_analyst, sample_strategist)
     print(json.dumps(result, indent=2))
+    print("\nAgent Thoughts:")
+    for t in agent_thoughts:
+        print(t)
