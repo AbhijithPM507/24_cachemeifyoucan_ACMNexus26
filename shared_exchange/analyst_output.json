@@ -3,6 +3,8 @@
     {
       "id": "SHP-001",
       "value": 285000,
+      "origin": "Mumbai",
+      "destination": "Kochi",
       "route": "NH-66",
       "cargo": "Electronics",
       "risk_score": 70,
@@ -11,6 +13,8 @@
     {
       "id": "SHP-003",
       "value": 67000,
+      "origin": "Coimbatore",
+      "destination": "Kochi",
       "route": "NH-66",
       "cargo": "Textiles",
       "risk_score": 60,
@@ -19,6 +23,8 @@
     {
       "id": "SHP-004",
       "value": 380000,
+      "origin": "Mumbai",
+      "destination": "Kochi",
       "route": "NH-66",
       "cargo": "Machinery",
       "risk_score": 70,
@@ -27,6 +33,8 @@
     {
       "id": "SHP-005",
       "value": 520000,
+      "origin": "Cochin Port",
+      "destination": "Bangalore",
       "route": "NH-66",
       "cargo": "Automobile Parts",
       "risk_score": 80,
@@ -35,6 +43,8 @@
     {
       "id": "SHP-006",
       "value": 95000,
+      "origin": "Kochi",
+      "destination": "Chennai",
       "route": "NH-66",
       "cargo": "Spices",
       "risk_score": 60,
@@ -43,6 +53,8 @@
     {
       "id": "SHP-007",
       "value": 210000,
+      "origin": "Kochi",
+      "destination": "Mumbai",
       "route": "NH-66",
       "cargo": "Marine Products",
       "risk_score": 70,
@@ -51,6 +63,8 @@
     {
       "id": "SHP-008",
       "value": 175000,
+      "origin": "Kochi",
+      "destination": "Thiruvananthapuram",
       "route": "NH-66",
       "cargo": "Agricultural Products",
       "risk_score": 50,
@@ -59,6 +73,8 @@
     {
       "id": "SHP-010",
       "value": 88000,
+      "origin": "Coimbatore",
+      "destination": "Mangalore",
       "route": "NH-66",
       "cargo": "Textiles",
       "risk_score": 60,
@@ -67,6 +83,8 @@
     {
       "id": "SHP-011",
       "value": 420000,
+      "origin": "Mumbai",
+      "destination": "Cochin Port",
       "route": "Sea Route via NH-66",
       "cargo": "Chemicals",
       "risk_score": 90,
@@ -75,6 +93,8 @@
     {
       "id": "SHP-013",
       "value": 72500,
+      "origin": "Mangalore",
+      "destination": "Kochi",
       "route": "NH-66",
       "cargo": "Coffee",
       "risk_score": 60,

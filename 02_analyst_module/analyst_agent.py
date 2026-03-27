@@ -85,6 +85,8 @@ def filter_affected_shipments(shipments, scout_output):
             reason = generate_reason(shipment)
             affected.append({
                 "id": shipment["id"],
+                "origin": shipment["origin"],
+                "destination": shipment["destination"],
                 "value": shipment["value"],
                 "route": shipment["route"],
                 "cargo": shipment["cargo"],
@@ -259,6 +261,8 @@ def save_output(scout_output, affected_shipments, metrics, llm_output=None):
             {
                 "id": s["id"],
                 "value": s["value"],
+                "origin": s["origin"],
+                "destination": s["destination"],
                 "route": s["route"],
                 "cargo": s["cargo"],
                 "risk_score": s["risk_score"],
