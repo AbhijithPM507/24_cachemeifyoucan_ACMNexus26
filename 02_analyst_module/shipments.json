@@ -1,0 +1,167 @@
+[
+  {
+    "id": "SHP-001",
+    "value": 285000,
+    "origin": "Mumbai",
+    "destination": "Kochi",
+    "route": "NH-66",
+    "cargo": "Electronics",
+    "weight_kg": 2400,
+    "eta_days": 3,
+    "priority": "HIGH"
+  },
+  {
+    "id": "SHP-002",
+    "value": 142000,
+    "origin": "Chennai",
+    "destination": "Bangalore",
+    "route": "NH-44",
+    "cargo": "Pharmaceuticals",
+    "weight_kg": 800,
+    "eta_days": 2,
+    "priority": "CRITICAL"
+  },
+  {
+    "id": "SHP-003",
+    "value": 67000,
+    "origin": "Coimbatore",
+    "destination": "Kochi",
+    "route": "NH-66",
+    "cargo": "Textiles",
+    "weight_kg": 5000,
+    "eta_days": 1,
+    "priority": "MEDIUM"
+  },
+  {
+    "id": "SHP-004",
+    "value": 380000,
+    "origin": "Mumbai",
+    "destination": "Kochi",
+    "route": "NH-66",
+    "cargo": "Machinery",
+    "weight_kg": 8000,
+    "eta_days": 4,
+    "priority": "HIGH"
+  },
+  {
+    "id": "SHP-005",
+    "value": 520000,
+    "origin": "Cochin Port",
+    "destination": "Bangalore",
+    "route": "NH-66",
+    "cargo": "Automobile Parts",
+    "weight_kg": 12000,
+    "eta_days": 2,
+    "priority": "CRITICAL"
+  },
+  {
+    "id": "SHP-006",
+    "value": 95000,
+    "origin": "Kochi",
+    "destination": "Chennai",
+    "route": "NH-66",
+    "cargo": "Spices",
+    "weight_kg": 3000,
+    "eta_days": 2,
+    "priority": "MEDIUM"
+  },
+  {
+    "id": "SHP-007",
+    "value": 210000,
+    "origin": "Kochi",
+    "destination": "Mumbai",
+    "route": "NH-66",
+    "cargo": "Marine Products",
+    "weight_kg": 6000,
+    "eta_days": 3,
+    "priority": "HIGH"
+  },
+  {
+    "id": "SHP-008",
+    "value": 175000,
+    "origin": "Kochi",
+    "destination": "Thiruvananthapuram",
+    "route": "NH-66",
+    "cargo": "Agricultural Products",
+    "weight_kg": 4500,
+    "eta_days": 1,
+    "priority": "LOW"
+  },
+  {
+    "id": "SHP-009",
+    "value": 345000,
+    "origin": "Bangalore",
+    "destination": "Kochi",
+    "route": "NH-48",
+    "cargo": "Electronics",
+    "weight_kg": 1500,
+    "eta_days": 4,
+    "priority": "HIGH"
+  },
+  {
+    "id": "SHP-010",
+    "value": 88000,
+    "origin": "Coimbatore",
+    "destination": "Mangalore",
+    "route": "NH-66",
+    "cargo": "Textiles",
+    "weight_kg": 3500,
+    "eta_days": 3,
+    "priority": "MEDIUM"
+  },
+  {
+    "id": "SHP-011",
+    "value": 420000,
+    "origin": "Mumbai",
+    "destination": "Cochin Port",
+    "route": "Sea Route via NH-66",
+    "cargo": "Chemicals",
+    "weight_kg": 15000,
+    "eta_days": 5,
+    "priority": "CRITICAL"
+  },
+  {
+    "id": "SHP-012",
+    "value": 156000,
+    "origin": "Chennai",
+    "destination": "Kochi",
+    "route": "NH-44",
+    "cargo": "Pharmaceuticals",
+    "weight_kg": 900,
+    "eta_days": 3,
+    "priority": "HIGH"
+  },
+  {
+    "id": "SHP-013",
+    "value": 72500,
+    "origin": "Mangalore",
+    "destination": "Kochi",
+    "route": "NH-66",
+    "cargo": "Coffee",
+    "weight_kg": 2000,
+    "eta_days": 1,
+    "priority": "MEDIUM"
+  },
+  {
+    "id": "SHP-014",
+    "value": 298000,
+    "origin": "Kochi",
+    "destination": "Bangalore",
+    "route": "NH-48",
+    "cargo": "Pharmaceuticals",
+    "weight_kg": 1100,
+    "eta_days": 3,
+    "priority": "HIGH"
+  },
+  {
+    "id": "SHP-015",
+    "value": 475000,
+    "origin": "Cochin Port",
+    "destination": "Mumbai",
+    "route": "Sea Route",
+    "cargo": "Machinery",
+    "weight_kg": 22000,
+    "eta_days": 4,
+    "priority": "CRITICAL"
+  }
+]

@@ -1,0 +1,144 @@
+[
+  {
+    "event_id": "EVT-001",
+    "date": "2024-08-15",
+    "disruption_type": "flash_flood",
+    "location": "Kochi",
+    "highway": "NH-66",
+    "severity": "HIGH",
+    "value_at_risk": 380000,
+    "action_taken": "Air",
+    "new_route": "Kochi to Bangalore via Air freight, Cochin Airport",
+    "savings_achieved": 290000,
+    "outcome": "SUCCESS",
+    "lesson": "NH-66 floods typically last 18-24 hours. Air is 3x faster but 2x cost. Net positive for shipments above $150k."
+  },
+  {
+    "event_id": "EVT-002",
+    "date": "2024-06-22",
+    "disruption_type": "port_strike",
+    "location": "Cochin Port",
+    "severity": "CRITICAL",
+    "value_at_risk": 920000,
+    "action_taken": "Rail",
+    "new_route": "Ernakulam Junction to Chennai Central via Rail",
+    "savings_achieved": 680000,
+    "outcome": "SUCCESS",
+    "lesson": "Port strikes last 48-72 hours. Rail via Ernakulam avoids port entirely. Pre-book wagons immediately."
+  },
+  {
+    "event_id": "EVT-003",
+    "date": "2024-09-10",
+    "disruption_type": "flash_flood",
+    "location": "Thrissur",
+    "highway": "NH-544",
+    "severity": "MEDIUM",
+    "value_at_risk": 145000,
+    "action_taken": "Road_bypass",
+    "new_route": "NH-544 bypass via Palakkad",
+    "savings_achieved": 98000,
+    "outcome": "PARTIAL",
+    "lesson": "Palakkad bypass adds 4 hours but avoids NH-544 floods. Only viable for shipments under 5000kg."
+  },
+  {
+    "event_id": "EVT-004",
+    "date": "2024-11-03",
+    "disruption_type": "bridge_closure",
+    "location": "Perumbavoor",
+    "severity": "HIGH",
+    "value_at_risk": 210000,
+    "action_taken": "Rail",
+    "new_route": "Angamaly to Ernakulam via Rail, then road delivery",
+    "savings_achieved": 155000,
+    "outcome": "SUCCESS",
+    "lesson": "Bridge closures near Perumbavoor are often 3-5 day repairs. Rail+last mile is most reliable alternative."
+  },
+  {
+    "event_id": "EVT-005",
+    "date": "2025-01-18",
+    "disruption_type": "cyclone_warning",
+    "location": "Kozhikode",
+    "severity": "CRITICAL",
+    "value_at_risk": 1200000,
+    "action_taken": "Air",
+    "new_route": "Calicut Airport emergency freight",
+    "savings_achieved": 890000,
+    "outcome": "SUCCESS",
+    "lesson": "Cyclone warnings give 6-12 hour windows. Act within first 2 hours or airports close too. Pre-authorise emergency air budget."
+  },
+  {
+    "event_id": "EVT-001",
+    "event_type": "Flood",
+    "location": "NH-66, Goa coast",
+    "severity": "HIGH",
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-27 20:27:11"
+  },
+  {
+    "event_id": "EVT-002",
+    "event_type": "Flood",
+    "location": "NH-66, Goa coast",
+    "severity": "HIGH",
+    "lesson_learned": "Last time a flash flood occurred on NH-66, air freight was 3x faster but 2x the cost, resulting in a net positive for shipments above $150k.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.2,
+    "timestamp": "2026-03-27 20:28:24"
+  },
+  {
+    "event_id": "EVT-003",
+    "event_type": "Flood",
+    "location": "NH-66, Goa coast",
+    "severity": "HIGH",
+    "lesson_learned": "Last time a flash flood occurred on NH-66, air freight was 3x faster but 2x the cost, resulting in a net positive for shipments above $150k.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.2,
+    "timestamp": "2026-03-27 20:28:46"
+  },
+  {
+    "event_id": "EVT-004",
+    "event_type": "Flood",
+    "location": "NH-66, Goa coast",
+    "severity": "HIGH",
+    "lesson_learned": "Last time a flash flood occurred on NH-66, air freight was 3x faster but 2x the cost, resulting in a net positive for shipments above $150k.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.2,
+    "timestamp": "2026-03-27 20:30:14"
+  },
+  {
+    "event_id": "EVT-005",
+    "event_type": "Flood",
+    "location": "NH-66, Goa coast",
+    "severity": "HIGH",
+    "lesson_learned": "Last time a flash flood occurred on NH-66, air freight was 3x faster but 2x the cost, resulting in a net positive for shipments above $150k.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.2,
+    "timestamp": "2026-03-27 20:33:41"
+  }
+]
