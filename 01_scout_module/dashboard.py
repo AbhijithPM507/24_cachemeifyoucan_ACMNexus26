@@ -309,7 +309,7 @@ def render_map(location_name):
     )
     
     r = pdk.Deck(
-        map_style='mapbox://styles/mapbox/dark-v11',
+        map_style='carto-dark',
         layers=[glow_layer, layer],
         initial_view_state=view_state,
         tooltip={"text": f"⚠️ Disruption Zone: {location_name}"}
