@@ -85,6 +85,8 @@ def filter_affected_shipments(shipments, scout_output):
             reason = generate_reason(shipment)
             affected.append({
                 "id": shipment["id"],
+                "origin": shipment["origin"],
+                "destination": shipment["destination"],
                 "value": shipment["value"],
                 "route": shipment["route"],
                 "cargo": shipment["cargo"],
@@ -179,7 +181,7 @@ def call_groq_llm(scout_output, affected_shipments, metrics):
         
         user_prompt = f"""Analyze this supply chain disruption:
 
-Event: {scout_output['event']}
+Event: {scout_output.get('event') or scout_output.get('description') or 'UNKNOWN'}
 Location: {scout_output['location']}
 Severity: {scout_output['severity']}
 
@@ -259,6 +261,8 @@ def save_output(scout_output, affected_shipments, metrics, llm_output=None):
             {
                 "id": s["id"],
                 "value": s["value"],
+                "origin": s["origin"],
+                "destination": s["destination"],
                 "route": s["route"],
                 "cargo": s["cargo"],
                 "risk_score": s["risk_score"],
@@ -300,7 +304,7 @@ def run_analyst_agent():
         print(f"ERROR: Invalid JSON - {e}")
         return None
     
-    print(f"Loaded scout data: {scout_output['event']} at {scout_output['location']}")
+    print(f"Loaded scout data: {scout_output.get('event') or scout_output.get('description') or 'UNKNOWN'} at {scout_output['location']}")
     print(f"Loaded {len(shipments)} shipments")
     
     affected = filter_affected_shipments(shipments, scout_output)

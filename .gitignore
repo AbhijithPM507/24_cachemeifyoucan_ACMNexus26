@@ -1,3 +1,28 @@
+# ==============================================================================
+# NEXUSPATH PROJECT .GITIGNORE
+# ==============================================================================
+
+# 1. Python-related ignores (compiled code and build artifacts)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+
+# 2. Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# 3. Environment variables / secrets (protects API keys and passwords)
+.env
+.env.*
+
+# 4. IDE / Editor files (workspace overrides and swap files)
 # Environment variables
 .env
 .env.local
@@ -36,6 +61,24 @@ env/
 .idea/
 *.swp
 *.swo
+
+# 5. OS-generated files
+.DS_Store
+Thumbs.db
+
+# 6. PROJECT-SPECIFIC: Multi-Agent shared exchange
+# Ignore agent-generated JSON files and audio outputs, but NOT the folder itself
+/shared_exchange/*.json
+/shared_exchange/*.mp3
+# Explicitly track the placeholder file to keep the folder in source control
+!/shared_exchange/.gitkeep
+
+# 7. Logs & temp files (prevent log pollution)
+*.log
+*.tmp
+
+# 8. Streamlit cache (UI runtime files)
+.streamlit/
 *~
 
 # OS
