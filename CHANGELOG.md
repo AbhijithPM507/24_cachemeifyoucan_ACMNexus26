@@ -1,3 +1,18 @@
+## 05:27
+
+### Features Added
+
+- **Geographically-Bound Chaos Engine**: Updated `chaos_trigger.py` to optionally inherit a dynamic location parameter to bound random events strictly to the Dashboard's actively selected path (origin/destination nodes). This prevents completely randomized city disruptions from randomly spawning miles away and circumventing the active route tracing pipeline.
+
+### Files Modified
+
+- `01_scout_module/chaos_trigger.py`
+- `01_scout_module/dashboard.py`
+
+### Issues Faced
+
+- None
+
 ## 04:35
 
 ### Features Added

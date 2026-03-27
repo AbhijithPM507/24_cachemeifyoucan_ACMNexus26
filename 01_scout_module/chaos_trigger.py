@@ -4,9 +4,9 @@ import random
 import datetime
 from pathlib import Path
 
-def trigger_chaos():
+def trigger_chaos(target_locations=None):
     events = ["flash flood", "port strike", "road accident", "cyclone warning", "bridge closure"]
-    locations = ["Kochi", "Mumbai", "Mangalore", "Chennai", "Bangalore", "Cochin Port"]
+    locations = target_locations if target_locations else ["Kochi", "Mumbai", "Mangalore", "Chennai", "Bangalore", "Cochin Port"]
     sources = ["IMD_alert", "traffic_api", "union_feed", "NHAI_feed"]
     highways = ["NH-66", "NH-544", "NH-85"]
 
