@@ -196,3 +196,28 @@
 
 ### Issues Faced
 - Scout outputs `description` field, analyst expected `event` field
+
+## 22:40
+
+### Features Added
+- Integrated OSRM API into `simulator_agent.py` for live road routing data
+- Added `KERALA_HUBS` coordinate dictionary for major Indian cities
+- Implemented `get_osrm_route()` function with 5-minute caching
+- Added `extract_waypoint()` to parse strategist bypass suggestions
+- Updated Monte Carlo simulation with live OSRM data for μ (mean) calculations
+- Added `reliability_score` and `traffic_volatility` to simulation output
+- Added per-shipment `origin` and `destination` to `analyst_output.json`
+- Added `event_type` and `severity` fields to `analyst_output.json`
+- Updated simulator to extract origin/destination from analyst output
+
+### Files Modified
+- 03_intel_module/simulator_agent.py
+- shared_exchange/analyst_output.json
+
+### Files Added
+- .env.example (API key template)
+- event_counter.json (for EVT-ID tracking)
+
+### Issues Faced
+- OSRM function received string instead of dict for coordinates - fixed coordinate lookup from KERALA_HUBS
+- Groq API key invalidated during security cleanup - added fallback behavior

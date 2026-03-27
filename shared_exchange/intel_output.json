@@ -14,38 +14,51 @@
     {
       "mode": "Air",
       "iterations": 100,
-      "mean_time": 0.481,
-      "std_time": 0.135,
-      "min_time": 0.192,
-      "max_time": 0.869,
+      "mean_time": 0.47,
+      "std_time": 0.168,
+      "min_time": 0.103,
+      "max_time": 0.833,
       "p_arrival_within_target": 1.0,
       "cdf_probability": 1.0,
-      "target_window": 2.0
+      "target_window": 2.0,
+      "reliability_score": 0.737,
+      "traffic_volatility": 1.5,
+      "live_data": null
     },
     {
       "mode": "Rail",
       "iterations": 100,
-      "mean_time": 1.995,
-      "std_time": 0.25,
-      "min_time": 1.355,
-      "max_time": 2.526,
-      "p_arrival_within_target": 0.46,
-      "cdf_probability": 0.507,
-      "target_window": 2.0
+      "mean_time": 1.977,
+      "std_time": 0.344,
+      "min_time": 1.111,
+      "max_time": 2.968,
+      "p_arrival_within_target": 0.54,
+      "cdf_probability": 0.527,
+      "target_window": 2.0,
+      "reliability_score": 0.852,
+      "traffic_volatility": 1.5,
+      "live_data": null
     },
     {
       "mode": "Road_bypass",
       "iterations": 100,
-      "mean_time": 1.185,
-      "std_time": 0.527,
+      "mean_time": 0.985,
+      "std_time": 0.847,
       "min_time": 0.1,
-      "max_time": 2.447,
-      "p_arrival_within_target": 0.94,
-      "cdf_probability": 0.939,
-      "target_window": 2.0
+      "max_time": 3.17,
+      "p_arrival_within_target": 0.83,
+      "cdf_probability": 0.885,
+      "target_window": 2.0,
+      "reliability_score": 0.538,
+      "traffic_volatility": 1.5,
+      "live_data": {
+        "osrm_distance_km": 1374.2,
+        "osrm_duration_hours": 17.96,
+        "waypoint_used": false
+      }
     }
   ],
-  "reasoning": "Air freight has the highest probability of arrival within the target window (1.0) and the lowest mean delivery time (0.481), aligning with the strategic lesson that air freight was 3x faster in similar scenarios.",
-  "agent_thoughts": "[2026-03-27 20:33:40] Strategic Insight: Matched event_id=EVT-001, bias_factor=1.2\n[2026-03-27 20:33:40] Simulator: Mode=Air, mean=0.481d, P(arrival)=1.0\n[2026-03-27 20:33:40] Simulator: Mode=Rail, mean=1.995d, P(arrival)=0.46\n[2026-03-27 20:33:40] Simulator: Mode=Road_bypass, mean=1.185d, P(arrival)=0.94\n[2026-03-27 20:33:41] Oracle: Recommended Air with 0.95 confidence",
-  "timestamp": "2026-03-27 20:33:41"
+  "reasoning": "Based on the Monte Carlo simulation results and the strategic lesson from the Strategist, Air mode is the most reliable option with a probability of arrival within the target window of 1.0 and a mean delivery time of 0.47. The live OSRM routing data indicates that the direct route is not feasible, but Air mode provides a viable alternative. Historical lessons suggest that air freight is 3x faster but 2x the cost, resulting in a net positive for shipments above $150k.",
+  "agent_thoughts": "[2026-03-27 22:27:41] Strategic Insight: Matched event_id=EVT-001, bias_factor=1.2\n[2026-03-27 22:27:41] Simulator: Origin={'lon': 72.8777, 'lat': 19.076}, Dest={'lon': 76.2605, 'lat': 10.0153}\n[2026-03-27 22:27:43] OSRM: Fetched route 1374.2km in 17.96h\n[2026-03-27 22:27:43] Simulator: Mode=Air, mean=0.47d, P(arrival)=1.0, reliability=0.737\n[2026-03-27 22:27:43] Simulator: Mode=Rail, mean=1.977d, P(arrival)=0.54, reliability=0.852\n[2026-03-27 22:27:43] Simulator: Mode=Road_bypass, mean=0.985d, P(arrival)=0.83, reliability=0.538\n[2026-03-27 22:27:45] Oracle: Recommended Air with 0.95 confidence",
+  "timestamp": "2026-03-27 22:27:45"
 }
