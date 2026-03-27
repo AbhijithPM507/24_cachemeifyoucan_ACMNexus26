@@ -6,7 +6,7 @@ from pathlib import Path
 
 def trigger_chaos():
     events = ["flash flood", "port strike", "road accident", "cyclone warning", "bridge closure"]
-    locations = ["Kochi", "Thrissur", "Kozhikode", "Perumbavoor", "Cochin Port"]
+    locations = ["Kochi", "Mumbai", "Mangalore", "Chennai", "Bangalore", "Cochin Port"]
     sources = ["IMD_alert", "traffic_api", "union_feed", "NHAI_feed"]
     highways = ["NH-66", "NH-544", "NH-85"]
 

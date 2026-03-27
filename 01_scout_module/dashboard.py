@@ -2,6 +2,8 @@ import os
 import sys
 import json
 import time
+import pandas as pd
+import pydeck as pdk
 import streamlit as st
 from pathlib import Path
 
@@ -19,6 +21,22 @@ SCOUT_PATH = SHARED_DIR / "scout_output.json"
 ANALYST_PATH = SHARED_DIR / "analyst_output.json"
 INTEL_PATH = SHARED_DIR / "intel_output.json"
 FINAL_RESULTS_PATH = SHARED_DIR / "final_results.json"
+
+KERALA_HUBS = {
+    "Kochi": {"lon": 76.2605, "lat": 10.0153},
+    "Thrissur": {"lon": 76.2105, "lat": 10.5276},
+    "Palakkad": {"lon": 76.5214, "lat": 10.7733},
+    "Wayanad": {"lon": 76.1323, "lat": 11.6854},
+    "Kozhikode": {"lon": 75.7772, "lat": 11.2588},
+    "Thiruvananthapuram": {"lon": 76.9728, "lat": 8.4855},
+    "Mumbai": {"lon": 72.8777, "lat": 19.0760},
+    "Bangalore": {"lon": 77.5946, "lat": 12.9716},
+    "Chennai": {"lon": 80.2707, "lat": 13.0827},
+    "Delhi": {"lon": 77.2090, "lat": 28.6139},
+    "Hyderabad": {"lon": 78.4867, "lat": 17.3850},
+    "Mangalore": {"lon": 74.8560, "lat": 12.9141},
+    "Cochin Port": {"lon": 76.2619, "lat": 9.9634}
+}
 
 st.set_page_config(page_title="NexusPath Dashboard", layout="wide", initial_sidebar_state="expanded")
 
@@ -243,8 +261,61 @@ def inject_custom_css():
             border-top: 1px solid #334155;
             padding-top: 1rem;
         }
+        
+        /* Map Container */
+        .map-container {
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid #1f2937;
+            margin-top: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
         </style>
     """, unsafe_allow_html=True)
+
+def render_map(location_name):
+    """Renders a 3D Pydeck map tracking the disruption location."""
+    if location_name not in KERALA_HUBS:
+        return
+        
+    coords = KERALA_HUBS[location_name]
+    df = pd.DataFrame([coords])
+    
+    st.markdown('<h3 style="color: #94a3b8; font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1.5rem; margin-bottom: 0.5rem;">📍 Threat Topography</h3>', unsafe_allow_html=True)
+    st.markdown('<div class="map-container">', unsafe_allow_html=True)
+    
+    layer = pdk.Layer(
+        'ScatterplotLayer',
+        data=df,
+        get_position='[lon, lat]',
+        get_color='[220, 38, 38, 180]',
+        get_radius=25000,
+        pickable=True
+    )
+    
+    glow_layer = pdk.Layer(
+        'ScatterplotLayer',
+        data=df,
+        get_position='[lon, lat]',
+        get_color='[239, 68, 68, 80]',
+        get_radius=50000,
+    )
+    
+    view_state = pdk.ViewState(
+        latitude=coords['lat'],
+        longitude=coords['lon'],
+        zoom=5.5,
+        pitch=45,
+    )
+    
+    r = pdk.Deck(
+        map_style=None, # Use default Deck.gl styles to avoid Mapbox key dependencies
+        layers=[glow_layer, layer],
+        initial_view_state=view_state,
+        tooltip={"text": f"⚠️ Disruption Zone: {location_name}"}
+    )
+    st.pydeck_chart(r)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------
 # APP LAYOUT
@@ -328,6 +399,40 @@ with col_left:
                 
             process_signal()
             
+            # --- TRIGGER ANALYST AGENT ---
+            from analyst_agent import run_analyst_agent
+            run_analyst_agent()
+            
+            # --- TRIGGER INTEL COORDINATOR ONE-OFF (OR RUN COMPONENT) ---
+            # Instead of the infinite loop coordinator, we call the specific runs
+            from strategist_agent import run_strategist
+            from simulator_agent import run_simulator
+            
+            a_data = load_json(ANALYST_PATH)
+            if a_data:
+                strat_res = run_strategist(a_data)
+                sim_res = run_simulator(a_data, strat_res)
+                
+                intel_output = {
+                    "strategic_lesson": strat_res.get("strategic_lesson", ""),
+                    "matched_event_id": strat_res.get("matched_event_id", -1),
+                    "match_confidence": sim_res.get("oracle_recommendation", {}).get("confidence_score", 0.0),
+                    "early_action_recommended": True if sim_res.get("oracle_recommendation", {}).get("confidence_score", 0.0) >= 0.7 else False,
+                    "alternative_routes": sim_res.get("oracle_recommendation", {}).get("alternative_modes", []),
+                    "recommended_mode": sim_res.get("oracle_recommendation", {}).get("recommended_mode", "Unknown"),
+                    "risk_assessment": sim_res.get("oracle_recommendation", {}).get("risk_assessment", "MEDIUM"),
+                    "bias_factor": strat_res.get("bias_factor", 1.0),
+                    "simulation_details": sim_res.get("simulation_results", []),
+                    "reasoning": sim_res.get("oracle_recommendation", {}).get("reasoning", ""),
+                    "agent_thoughts": "Strategist and Simulator complete analysis loop.",
+                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+                }
+                with open(INTEL_PATH, "w") as f:
+                    json.dump(intel_output, f, indent=2)
+            # --- TRIGGER MANAGER AGENT (FINAL) ---
+            from manager_agent import run_manager_pipeline_once
+            run_manager_pipeline_once()
+
             event_name = event_data.get('event', 'Unknown Event').upper()
             location = event_data.get('location', 'Unknown Location')
             st.warning(f"⚠️ **Chaos Injected:** {event_name} at {location}")
@@ -346,40 +451,81 @@ with col_left:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("<h2 style='color: white;'>Live Risk Dashboard</h2>", unsafe_allow_html=True)
     
+    # A. Pre-load JSONs for step analysis
     final_res = load_json(FINAL_RESULTS_PATH)
+    intel_data = load_json(INTEL_PATH)
+    analyst_data = load_json(ANALYST_PATH)
+    scout_data = load_json(SCOUT_PATH)
+    
     if final_res:
-        # A. ROI Metric
-        roi = str(final_res.get("projected_savings", "---"))
-        pulse_class = "metric-value roi-highlight" if demo_mode else "metric-value"
-        st.markdown(f'<div class="{pulse_class}">{roi}</div>', unsafe_allow_html=True)
-        st.markdown('<div class="metric-label">Projected Savings</div><br>', unsafe_allow_html=True)
+        # --- PHASE 4: MANAGER (Team Schema Update)
+        roi_data = final_res.get("roi", {})
+        savings = roi_data.get("savings", "---")
         
-        # B. Alert / Briefing
-        briefing = final_res.get("briefing_text", "No executive summary provided.")
-        st.info(f"📋 **Manager Briefing:** {briefing}")
+        pulse_class = "metric-value roi-highlight" if demo_mode else "metric-value"
+        st.markdown(f'<div class="{pulse_class}">₹ {savings:,}</div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-label">Projected Logistics Savings</div><br>', unsafe_allow_html=True)
+        
+        briefing = final_res.get("summary_text") or final_res.get("briefing_text", "No executive summary provided.")
+        st.info(f"🎙️ **Executive Briefing:** {briefing}")
         st.write("")
         
-        # C. Audio Player
-        mp3_path = final_res.get("mp3_path")
-        if mp3_path and os.path.exists(mp3_path):
-            st.audio(mp3_path, format="audio/mp3")
+        # Audio from Manager module
+        audio_path = os.path.join(BASE_DIR, "04_manager_module", "alert_english.mp3")
+        if not os.path.exists(audio_path):
+            audio_path = os.path.join(BASE_DIR, "04_manager_module", "alert.mp3")
+            
+        if os.path.exists(audio_path):
+            st.audio(audio_path, format="audio/mp3")
             st.write("")
         
-        # D. Action Buttons
         btn_c1, btn_c2 = st.columns(2)
         with btn_c1:
             if st.button("✅ Approve Reroute", use_container_width=True):
-                st.success("Reroute execution authorized. Logistics pivoting engaged.")
+                st.success("Logistics pivot executed. Reroute protocol active.")
                 time.sleep(2)
         with btn_c2:
             if st.button("❌ Reject", use_container_width=True):
-                st.error("Reroute rejected. Maintaining structural hold.")
+                st.error("Reroute rejected. Structural hold maintained.")
                 time.sleep(2)
+
+    elif intel_data:
+        # --- PHASE 3: INTEL COORDINATOR
+        mode_reco = intel_data.get("recommended_mode", "UNKNOWN").upper()
+        pulse_class = "metric-value pulse-text" if demo_mode else "metric-value" 
+        st.markdown(f'<div class="{pulse_class}" style="color: #38bdf8;">{mode_reco}</div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-label">SIMULATOR RECOMMENDED ROUTE</div><br>', unsafe_allow_html=True)
+        
+        conf = float(intel_data.get("match_confidence", 0.0)) * 100
+        st.info(f"🧠 **Strategist Pipeline Match:** Event intercepted with {conf:.1f}% confidence.")
+        
+        st.write("")
+        st.markdown('<div class="empty-state">Simulations processed. Awaiting Manager Agent final ROI calculation & audio generation...</div>', unsafe_allow_html=True)
+
+    elif analyst_data:
+        # --- PHASE 2: ANALYST
+        risk_val = analyst_data.get("total_value_at_risk", 0)
+        pulse_class = "metric-value"
+        st.markdown(f'<div class="{pulse_class}" style="color: #ef4444;">₹ {risk_val:,}</div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-label">TOTAL INR AT RISK</div><br>', unsafe_allow_html=True)
+        
+        shipment_count = len(analyst_data.get("affected_shipments", []))
+        st.warning(f"📊 **Analyst Warning:** {shipment_count} shipments caught in blast radius. Calculating routing permutations...")
+        
+        st.write("")
+        st.markdown('<div class="empty-state">Awaiting Oracle Simulator & Strategist Agent processing...</div>', unsafe_allow_html=True)
+
     else:
-        st.markdown('<div class="empty-state">Waiting for Final Manager Agent results... Ensure all modules have executed safely.</div>', unsafe_allow_html=True)
+        # --- PHASE 1: AWAITING CHAOS
+        st.markdown('<div class="empty-state">Waiting for system signals. Initiate Chaos to begin matrix visualization.</div>', unsafe_allow_html=True)
         
     st.markdown("</div>", unsafe_allow_html=True)
 
+    # Render the dynamic 3D Map if we have a disruption location pinned
+    if scout_data:
+        loc = scout_data.get("location")
+        if loc:
+            render_map(loc)
 
 with col_right:
     # --- AGENT INTELLIGENCE FEED ---
