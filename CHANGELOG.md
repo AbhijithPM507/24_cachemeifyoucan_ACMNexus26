@@ -80,3 +80,21 @@
 - Groq model `mixtral-8x7b-32768` decommissioned, updated to `llama-3.3-70b-versatile`
 - LLM not populating reason field, added programmatic reason generation
 - NH-48 and Sea Route incorrectly flagged, implemented stricter Kochi-specific filtering
+
+## 20:55
+
+### Features Added
+- Updated scout_output.json with Kochi road closure event (ROAD_CLOSURE at Kochi)
+- Added forceful JSON instruction in LLM prompt ("YOUR ENTIRE RESPONSE MUST BE ONLY THE JSON OBJECT")
+- Implemented programmatic reason generation for all shipments (no empty reasons)
+- Added save_output() function to parse and use LLM JSON response directly
+- Updated analyst_output.json format with specific shipment reasons
+
+### Files Modified
+- 02_analyst_module/analyst_agent.py
+- shared_exchange/scout_output.json
+- shared_exchange/analyst_output.json
+
+### Issues Faced
+- LLM ignoring reason field instructions, added explicit requirement and fallback generation
+- Currency mixing ($ and INR), added INR (₹) enforcement at prompt top and in agent_thoughts
