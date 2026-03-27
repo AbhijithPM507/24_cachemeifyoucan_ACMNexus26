@@ -246,3 +246,24 @@
 
 ### Issues Faced
 - The "Live Risk Dashboard" component presented blank empty states visually during intermediate downstream processes. Reprogrammed `dashboard.py` execution loops to actively poll and cleanly hydrate UI values sequentially as JSON endpoints are birthed in `shared_exchange`.
+
+
+## 23:25
+
+### Features Added
+- Unified the entire 5-step multi-agent pipeline into the Streamlit **Chaos Button** sequence (Chaos -> Scout -> Analyst -> Intel -> Manager).
+- Created `04_manager_module/manager_agent.py` to calculate projected ROI and generate executive summaries for the "Final Decision" stage.
+- Upgraded geographical mapping to use OpenSource Pydeck styling, eliminating Mapbox API key dependencies and resolving black background rendering.
+- Implemented robust `sys.path` injection in the Dashboard to support cross-module agent imports natively from disparate sub-directories.
+
+### Files Modified
+- `01_scout_module/dashboard.py`
+- `01_scout_module/scout_agent.py`
+- `CHANGELOG.md`
+
+### Files Added
+- `04_manager_module/manager_agent.py`
+
+### Issues Faced
+- The "Demo Progression Sequence" was stalling at Step 2 due to individual agents not being triggered in the UI loop; resolved by encapsulating the entire sequential pipeline into the primary `st.button` callback.
+- Pydeck map tiles were failing to render due to Mapbox key requirements; patched with generic Carto Dark tile providers.

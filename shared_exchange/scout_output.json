@@ -1,15 +1,15 @@
 {
-  "description": "A flash flood alert has been issued for Mangalore, indicating a potentially life-threatening situation. The severity of the alert suggests a significant impact on the area.",
-  "location": "Mangalore",
+  "description": "The bridge closure in Kochi may cause traffic congestion and delays for commuters. This event is likely to affect travel times on NH-66.",
+  "location": "Kochi",
   "severity": "HIGH",
-  "disruption_type": "weather",
-  "agent_thoughts": "The severity level of 4.0 indicates a high level of danger, and the fact that it's a flash flood suggests a rapid onset of flooding, which can be extremely disruptive to the supply chain. The IMD_alert source is a reliable one, which increases the confidence in this assessment.",
+  "disruption_type": "infrastructure",
+  "agent_thoughts": "The signal mentions a bridge closure, which is a significant infrastructure disruption, hence the high severity rating. The fact that it's on a national highway (NH-66) and in a major city (Kochi) also supports this assessment.",
   "raw_signal": {
-    "id": "EVT-3581",
-    "event": "flash flood",
-    "location": "Mangalore",
-    "timestamp": "2026-03-27T17:50:30.567305+00:00",
-    "source": "IMD_alert",
-    "severity_raw": 4.0
+    "id": "EVT-6136",
+    "event": "bridge closure",
+    "location": "Kochi",
+    "timestamp": "2026-03-27T17:58:09.474166+00:00",
+    "source": "NHAI_feed",
+    "highway": "NH-66"
   }
 }

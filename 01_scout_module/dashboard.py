@@ -7,10 +7,8 @@ import pydeck as pdk
 import streamlit as st
 from pathlib import Path
 
-# Add the current directory and other agent modules to path
+# Add the current directory to path so we can import local modules easily
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "02_analyst_module"))
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "03_intel_module"))
 
 from chaos_trigger import trigger_chaos
 from scout_agent import process_signal

@@ -216,5 +216,65 @@
     ],
     "bias_factor_applied": 1.2,
     "timestamp": "2026-03-27 23:18:40"
+  },
+  {
+    "event_id": "EVT-011",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "Last time a port strike occurred at Cochin Port, diverting shipments to Rail via Ernakulam Junction to Chennai Central resulted in significant savings and a successful outcome.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.2,
+    "timestamp": "2026-03-27 23:24:47"
+  },
+  {
+    "event_id": "EVT-012",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "Last time a port strike occurred at Cochin Port, diverting shipments to Rail via Ernakulam Junction to Chennai Central resulted in significant savings and a successful outcome.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.2,
+    "timestamp": "2026-03-27 23:25:18"
+  },
+  {
+    "event_id": "EVT-013",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "Last time a port strike occurred at Cochin Port, diverting shipments to Rail via Ernakulam Junction to Chennai Central resulted in significant savings and a successful outcome.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.2,
+    "timestamp": "2026-03-27 23:25:47"
+  },
+  {
+    "event_id": "EVT-014",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "Last time a flash flood occurred on NH-66, air freight was 3x faster but 2x the cost, resulting in a net positive for shipments above $150k.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.2,
+    "timestamp": "2026-03-27 23:28:28"
   }
 ]

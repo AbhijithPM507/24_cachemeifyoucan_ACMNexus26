@@ -1,8 +1,8 @@
 {
-  "id": "EVT-3581",
-  "event": "flash flood",
-  "location": "Mangalore",
-  "timestamp": "2026-03-27T17:50:30.567305+00:00",
-  "source": "IMD_alert",
-  "severity_raw": 4.0
+  "id": "EVT-6136",
+  "event": "bridge closure",
+  "location": "Kochi",
+  "timestamp": "2026-03-27T17:58:09.474166+00:00",
+  "source": "NHAI_feed",
+  "highway": "NH-66"
 }
