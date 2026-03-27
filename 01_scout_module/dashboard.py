@@ -274,14 +274,14 @@ def render_map(location_name, severity="HIGH"):
     # If OSRM failed or it's a non-road mode, use haversine for display
     display_dist = osrm_dist if osrm_dist > 0 else v_dist
 
-    st.markdown(f'<h3 class="title-glow" style="font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1.5rem; margin-bottom: 0.5rem;">📍 Logistics Corridor: {mode}</h3>', unsafe_allow_html=True)
+    st.markdown(f'<h3 class="title-glow" style="font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1.5rem; margin-bottom: 0.5rem;">Logistics Corridor: {mode}</h3>', unsafe_allow_html=True)
     st.markdown('<div class="map-container">', unsafe_allow_html=True)
     st.pydeck_chart(pdk.Deck(map_style=None, layers=[overlay_layer, glow_layer, route_layer, marker_layer], initial_view_state=pdk.ViewState(latitude=(start_loc["lat"]+end_loc["lat"])/2, longitude=(start_loc["lon"]+end_loc["lon"])/2, zoom=7 if mode in ["SHIP","AIR"] else 9, pitch=45)))
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Selector Plate
     st.markdown('<div class="info-panel">', unsafe_allow_html=True)
-    modes = [("🚢 SHIP","SHIP"), ("🚛 TRUCK","TRUCK"), ("🚆 RAIL","RAIL"), ("✈️ AIR","AIR")]
+    modes = [("SHIP","SHIP"), ("TRUCK","TRUCK"), ("RAIL","RAIL"), ("AIR","AIR")]
     cols = st.columns(len(modes) + 1)
     with cols[0]:
         st.markdown(f'<div style="text-align:center"><div class="info-lab">Distance</div><div class="info-val">{display_dist:.1f}</div><div class="info-lab">KM</div></div>', unsafe_allow_html=True)
@@ -293,7 +293,7 @@ def render_map(location_name, severity="HIGH"):
     st.markdown('</div>', unsafe_allow_html=True)
     
     if osrm_dur > 0 and mode == "TRUCK":
-        st.info(f"🛣️ **Real Route Optimized:** Estimated road duration via Highway Corridors: **{osrm_dur:.1f} hours**.")
+        st.info(f"Real Route Optimized: Estimated road duration via Highway Corridors: {osrm_dur:.1f} hours.")
 
 
 # -----------------
@@ -303,12 +303,12 @@ inject_custom_css()
 
 # --- SIDEBAR ---
 st.sidebar.title("System Parameters")
-demo_mode = st.sidebar.toggle("🎬 Enable Guided Demo Mode", value=True)
+demo_mode = st.sidebar.toggle("Enable Guided Demo Mode", value=True)
 st.session_state.auto_refresh = st.sidebar.checkbox("Auto-Refresh UI (3s)", value=True)
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("Disruption Simulation")
-if st.sidebar.button("🔴 INJECT CHAOS EVENT", use_container_width=True, type="primary"):
+if st.sidebar.button("INJECT CHAOS EVENT", use_container_width=True, type="primary"):
     with st.sidebar.status("Injecting Black Swan Event..."):
         for p in [SCOUT_PATH, ANALYST_PATH, INTEL_PATH, FINAL_RESULTS_PATH, SHARED_DIR / "signal.json"]:
             if p.exists(): p.unlink()
@@ -338,7 +338,7 @@ if st.sidebar.button("🔴 INJECT CHAOS EVENT", use_container_width=True, type="
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("System Recovery")
-if st.sidebar.button("🧹 Master Reset", use_container_width=True):
+if st.sidebar.button("Master Reset", use_container_width=True):
     for p in [SCOUT_PATH, ANALYST_PATH, INTEL_PATH, FINAL_RESULTS_PATH, SHARED_DIR / "signal.json"]:
         if p.exists(): p.unlink()
     for f in (BASE_DIR / "04_manager_module").glob("*.mp3"): f.unlink()
@@ -346,7 +346,7 @@ if st.sidebar.button("🧹 Master Reset", use_container_width=True):
     time.sleep(1); st.rerun()
 
 # SECTION 1: HEADER
-st.markdown('<h1 class="title-glow">🛰️ NexusPath — Antifragile Supply Chain</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="title-glow">NexusPath - Antifragile Supply Chain</h1>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle" style="color: #94a3b8; font-size: 1.15rem; margin-bottom: 3rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;">REAL-TIME AI CONTROL ROOM</div>', unsafe_allow_html=True)
 
 col_left, col_space, col_right = st.columns([6.5, 0.5, 3])
@@ -354,7 +354,7 @@ col_left, col_space, col_right = st.columns([6.5, 0.5, 3])
 with col_left:
     if demo_mode:
         st.markdown('<div class="step-panel">', unsafe_allow_html=True)
-        st.markdown("<h3 style='color: white; margin-bottom: 1.5rem;'>🎬 Demo Progression Sequence</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: white; margin-bottom: 1.5rem;'>Demo Progression Sequence</h3>", unsafe_allow_html=True)
         step = 0
         if load_json(FINAL_RESULTS_PATH): step = 5
         elif load_json(INTEL_PATH): step = 4
@@ -365,10 +365,10 @@ with col_left:
         msgs = ["Awaiting system trigger...", "Detecting disruption anomalies...", "Analyzing blast radius impact...", "Simulating alternatives...", "Calculating ROI...", "System stabilized."]
         for i, s_name in enumerate(steps):
             s_idx = i + 1
-            if s_idx == step: st.markdown(f"<div class='step-active'>▶ {s_name}</div>", unsafe_allow_html=True)
-            elif s_idx < step: st.markdown(f"<div class='step-inactive' style='color: #475569;'>✓ {s_name}</div>", unsafe_allow_html=True)
+            if s_idx == step: st.markdown(f"<div class='step-active'> {s_name}</div>", unsafe_allow_html=True)
+            elif s_idx < step: st.markdown(f"<div class='step-inactive' style='color: #475569;'> [COMPLETE] {s_name}</div>", unsafe_allow_html=True)
             else: st.markdown(f"<div class='step-inactive'>{s_name}</div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='demo-msg'>▶ {msgs[step]}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='demo-msg'> STATUS: {msgs[step]}</div>", unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     # MAIN RISK DASHBOARD
@@ -394,9 +394,8 @@ with col_left:
             st.markdown(f'<div class="metric-value" style="color: #38bdf8; font-size: 3.5rem;">{mode_reco}</div>', unsafe_allow_html=True)
             st.markdown('<div class="metric-label">Authorized Mode</div>', unsafe_allow_html=True)
             
-        st.write("")
         briefing = final_res.get("summary_text") or "No executive summary."
-        st.info(f"🎙️ **Executive Briefing:** {briefing}")
+        st.info(f"Executive Briefing: {briefing}")
         audio_path = os.path.join(BASE_DIR, "04_manager_module", "alert_english.mp3")
         if not os.path.exists(audio_path): audio_path = os.path.join(BASE_DIR, "04_manager_module", "alert.mp3")
         if os.path.exists(audio_path): st.audio(audio_path, format="audio/mp3")
@@ -405,7 +404,7 @@ with col_left:
         st.markdown(f'<div class="metric-value" style="color: #38bdf8;">{mode_reco}</div>', unsafe_allow_html=True)
         st.markdown('<div class="metric-label">SIMULATOR RECOMMENDED ROUTE</div><br>', unsafe_allow_html=True)
         conf = float(intel_data.get("match_confidence", 0.0)) * 100
-        st.info(f"🧠 **Strategist Match:** Intercepted with {conf:.1f}% confidence.")
+        st.info(f"Strategist Match: Intercepted with {conf:.1f}% confidence.")
     elif analyst_data:
         risk_val = analyst_data.get("total_value_at_risk", 0)
         st.markdown(f'<div class="metric-value" style="color: #ef4444;">₹ {risk_val:,}</div>', unsafe_allow_html=True)
@@ -420,7 +419,7 @@ with col_left:
 with col_right:
     st.markdown('<div class="dark-card">', unsafe_allow_html=True)
     st.markdown("<h2 style='color: white; margin-bottom: 1.5rem;'>Agent Intelligence Feed</h2>", unsafe_allow_html=True)
-    feed = {"🔭 Scout": scout_data, "📊 Analyst": analyst_data, "🧠 Strategist": intel_data, "🎙️ Manager": final_res}
+    feed = {"Scout": scout_data, "Analyst": analyst_data, "Strategist": intel_data, "Manager": final_res}
     has_feed = False
     for label, data in feed.items():
         if data and "agent_thoughts" in data:
