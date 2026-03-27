@@ -1,8 +1,15 @@
 {
-  "event": "ROAD_CLOSURE",
-  "location": "Kochi",
+  "description": "A bridge closure has been reported in Chennai, which may cause traffic congestion and delays. The affected highway is NH-85.",
+  "location": "Chennai",
   "severity": "HIGH",
-  "details": "NH-66 blocked near Edapally junction due to flash flooding",
-  "affected_routes": ["NH-66"],
-  "timestamp": "2026-03-27T10:30:00"
+  "disruption_type": "infrastructure",
+  "agent_thoughts": "The signal indicates a bridge closure, which is a significant infrastructure disruption that can have a substantial impact on traffic flow, hence categorizing it as HIGH severity. The disruption type is classified as infrastructure as it involves a structural issue with the bridge.",
+  "raw_signal": {
+    "id": "EVT-2388",
+    "event": "bridge closure",
+    "location": "Chennai",
+    "timestamp": "2026-03-27T17:36:59.071141+00:00",
+    "source": "NHAI_feed",
+    "highway": "NH-85"
+  }
 }

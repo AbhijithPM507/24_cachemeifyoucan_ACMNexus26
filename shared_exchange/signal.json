@@ -1,8 +1,8 @@
 {
-  "id": "EVT-5260",
-  "event": "cyclone warning",
-  "location": "Perumbavoor",
-  "timestamp": "2026-03-27T16:42:16.444147+00:00",
-  "source": "IMD_alert",
-  "severity_raw": 2.0
+  "id": "EVT-2388",
+  "event": "bridge closure",
+  "location": "Chennai",
+  "timestamp": "2026-03-27T17:36:59.071141+00:00",
+  "source": "NHAI_feed",
+  "highway": "NH-85"
 }

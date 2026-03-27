@@ -186,5 +186,20 @@
     ],
     "bias_factor_applied": 1.2,
     "timestamp": "2026-03-27 22:27:45"
+  },
+  {
+    "event_id": "EVT-009",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "Last time a flash flood occurred on NH-66, air freight was 3x faster but 2x the cost, resulting in a net positive for shipments above $150k.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.2,
+    "timestamp": "2026-03-27 22:59:42"
   }
 ]
