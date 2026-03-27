@@ -1,0 +1,87 @@
+{
+  "affected_shipments": [
+    {
+      "id": "SHP-001",
+      "value": 285000,
+      "route": "NH-66",
+      "cargo": "Electronics",
+      "risk_score": 70,
+      "reason": "HIGH priority Electronics shipment blocked as NH-66 through Kochi is its primary route with no bypass."
+    },
+    {
+      "id": "SHP-003",
+      "value": 67000,
+      "route": "NH-66",
+      "cargo": "Textiles",
+      "risk_score": 60,
+      "reason": "MEDIUM priority Textiles shipment rerouted around blocked NH-66 at Kochi."
+    },
+    {
+      "id": "SHP-004",
+      "value": 380000,
+      "route": "NH-66",
+      "cargo": "Machinery",
+      "risk_score": 70,
+      "reason": "HIGH priority Machinery shipment stranded as NH-66 through Kochi is impassable."
+    },
+    {
+      "id": "SHP-005",
+      "value": 520000,
+      "route": "NH-66",
+      "cargo": "Automobile Parts",
+      "risk_score": 80,
+      "reason": "CRITICAL Automobile Parts shipment faces delivery failure due to NH-66 closure at Kochi."
+    },
+    {
+      "id": "SHP-006",
+      "value": 95000,
+      "route": "NH-66",
+      "cargo": "Spices",
+      "risk_score": 60,
+      "reason": "MEDIUM priority Spices shipment must bypass blocked NH-66 near Kochi."
+    },
+    {
+      "id": "SHP-007",
+      "value": 210000,
+      "route": "NH-66",
+      "cargo": "Marine Products",
+      "risk_score": 70,
+      "reason": "HIGH priority Marine Products shipment disrupted as NH-66 through Kochi is closed."
+    },
+    {
+      "id": "SHP-008",
+      "value": 175000,
+      "route": "NH-66",
+      "cargo": "Agricultural Products",
+      "risk_score": 50,
+      "reason": "LOW priority Agricultural Products shipment delayed on NH-66 near Kochi."
+    },
+    {
+      "id": "SHP-010",
+      "value": 88000,
+      "route": "NH-66",
+      "cargo": "Textiles",
+      "risk_score": 60,
+      "reason": "MEDIUM priority Textiles shipment rerouted around blocked NH-66 at Kochi."
+    },
+    {
+      "id": "SHP-011",
+      "value": 420000,
+      "route": "Sea Route via NH-66",
+      "cargo": "Chemicals",
+      "risk_score": 90,
+      "reason": "CRITICAL Chemicals shipment dangerous situation - NH-66 through Kochi blocked with no safe alternative."
+    },
+    {
+      "id": "SHP-013",
+      "value": 72500,
+      "route": "NH-66",
+      "cargo": "Coffee",
+      "risk_score": 60,
+      "reason": "MEDIUM priority Coffee shipment affected by NH-66 closure at Kochi."
+    }
+  ],
+  "total_value_at_risk": 2312500,
+  "recommended_action": "Immediate rerouting or delay notification for affected shipments. Consider activating backup routes via Air freight, NH-48 or NH-44.",
+  "agent_thoughts": "10 shipments totaling \u20b92,312,500 at HIGH risk. HIGH risk exposure requires immediate attention."
+}
