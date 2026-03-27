@@ -1,3 +1,40 @@
+## 04:35
+
+### Features Added
+
+- **Exhaustive RAIL Network Mapping**: Replaced partial railway routes with a comprehensive programmatically-generated graph mapping all 78 bidirectional unique permutations between the 13 defined logistics hubs.
+- **Multimodal Contingency Network Visualization**: Reworked the Pydeck layering logic so that when a disruption event occurs, the map visualizes all available alternative modes (TRUCK, RAIL, AIR, SHIP) simultaneously as dim red 'ghost' layers, plotting the AI-selected optimal path cleanly on top in bright green.
+- **Dynamic Mode-Aware Pathing**: Authored distinct spatial rendering logic for `AIR` (Great Circle direct trajectory) and `SHIP` (maritime-aware coastal arcing that safely circumvents landmasses) instead of having them erroneously piggyback onto TRUCK highway spines.
+- **Interactive Metrics Tooltips**: Upgraded all rendered transport vectors to be fully interactive in the map, computing and rendering rich HTML tooltips on hover/click that display the given Transport Mode, the precise Distance in kilometers, and accurately formatted ETA (in Hours or Mins).
+
+### Files Modified
+
+- `01_scout_module/dashboard.py`
+
+### Issues Faced
+
+- None
+
+## 04:04
+
+### Features Added
+
+- **Route Configuration Panel**: Added Origin & Destination hub selectors inline above the map; selections now persist through chaos injection via stable `route_origin`/`route_dest` session state keys decoupled from widget keys
+- **Disruption Alert Card**: Live card above the map shows event type, affected zone, severity badge (with pulsing dot animation), event ID, source system, detection timestamp, and AI impact summary when a chaos event is active
+- **Accurate Railway Paths**: Replaced OSRM road proxy for RAIL mode with a dedicated `RAIL_SPINES` dictionary mapping actual Southern Railway / Konkan Railway station waypoints (Ernakulam → Thrissur → Shoranur → Kozhikode → Kannur → Kasaragod → Mangalore; inter-state via Coimbatore → Bangalore/Chennai; Konkan Railway to Mumbai); also calculates distance and estimated duration at 65 km/h freight speed
+- **Dual-Route Rerouting Colors**: Old compromised route shown as dimmed red ghost (alpha 70/255); new AI-recommended route shown as solid bright green — universal red/green signal regardless of transport mode
+- **`normalize_mode()` helper**: Parses verbose AI-generated mode strings like `"RAIL CARGO CORRIDOR VIA INLAND RAIL NETWORK"` → `"RAIL"` for reliable routing and coloring
+- **Minimum-distance Guard**: If disruption location is within 30 km of origin, map auto-selects `Kozhikode` as fallback to prevent invisible zero-length routes
+- **Fixed HTML rendering bug**: Disruption card previously rendered as raw HTML text; fixed by pre-computing all conditional HTML fragments as Python variables before the f-string
+
+### Files Modified
+
+- `01_scout_module/dashboard.py`
+
+### Issues Faced
+
+- Streamlit f-strings with Python ternary operators containing HTML strings cause the renderer to escape and display raw HTML — resolved by pre-building string fragments outside the f-string template
+
 ## 09:00
 
 ### Features Added
@@ -372,3 +409,60 @@
 ### Issues Faced
 - **Groq Rate Limit Exceeded**: The 70B model reached daily token capacity mid-demonstration; resolved by switching to the faster, more flexible 8B-instant model.
 - **Path Resolution Errors**: Standard cross-module imports were failing during Streamlit execution; patched with absolute `sys.path` injections and module-level `os.path` normalization.
+
+
+## 00:00 (Final Release)
+
+### Features Added
+- Finalized Dashboard UI polish: Corrected "Master Reset" placement in the sidebar and ensured "Guided Demo Mode" defaults to ON for the jury presentation.
+- Verified end-to-end ROI logic: Confirmed the Analyst (Value at Risk) to Manager (Net Savings) financial handoff accuracy.
+- Enforced a zero-state baseline: Purged all legacy `shared_exchange` JSONs and audio artifacts to ensure the first project trigger is fresh.
+
+### Files Modified
+- `01_scout_module/dashboard.py`
+- `CHANGELOG.md`
+
+### Issues Faced
+- **UI Reset Stall**: The Reset button was initially failing to clear nested file system glob patterns for MP3s; patched with absolute `Path` normalization.
+
+## 00:50
+
+### Features Added
+
+- Engineered a **Premium Interactive Logistics Dashboard** overhaul:
+    - Implemented **Multi-Modal Vector Selection** (Ship, Truck, Rail, Air) with real-time UI switching.
+    - Integrated **High-Fidelity Path Simulation** for key Indian corridors (NH-66, Salem-Bangalore AH-43, South Coastal Spine).
+    - Developed a **Dynamic Telemetry Engine** using the Haversine formula to calculate accurate distances (km) and supply chain ETAs.
+    - Switched map rendering to a **No-Key-Required Cyberpunk Theme** with custom Purple Neon Overlays.
+    - Relocated the **Chaos Trigger System** to the Sidebar to maximize the main monitoring real estate.
+    - Stabilized the **decision-matching logic** to ensure transport recommendations persist in the UI after pipeline cleanup.
+
+### Files Modified
+
+- `01_scout_module/dashboard.py`
+- `CHANGELOG.md`
+- `progress/4.md`
+
+### Issues Faced
+
+- **Mapbox API Block**: Map tiles were failing on premium dark-v10 style due to missing keys; resolved by injecting a synthetic neon filter over the default Deck.gl layer.
+- **Race Condition in Cleanup**: The Manager Agent was deleting Intel output before the UI could render the recommended mode; patched by sourcing the transport mode directly from the persistent `final_results.json` object.
+
+## 01:00
+
+### Features Added
+
+- Integrated **Live OSRM Routing Engine** for 1:1 high-fidelity road topography.
+- Developed a **GeoJSON Path Extractor** that replaces simulated vectors with actual highway coordinates.
+- Implemented **Live Road Telemetry** (Distance in KM, Duration in Hours) directly from the routing engine.
+- Engineered a **Multi-layered Route Visualization** that tracks the exact curvature of the Western Ghats and NH-66.
+
+### Files Modified
+
+- `01_scout_module/dashboard.py`
+- `CHANGELOG.md`
+- `progress/5.md`
+
+### Issues Faced
+
+- **Path Resolution drift**: Raw coordinates from the routing API required `[lon, lat]` list-of-list normalization for Pydeck compatibility; resolved with a custom GeoJSON mapping layer.

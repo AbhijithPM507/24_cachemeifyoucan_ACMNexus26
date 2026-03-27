@@ -383,5 +383,467 @@
     ],
     "bias_factor_applied": 1.0,
     "timestamp": "2026-03-27 23:45:22"
+  },
+  {
+    "event_id": "EVT-022",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-27 23:52:34"
+  },
+  {
+    "event_id": "EVT-023",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 00:06:54"
+  },
+  {
+    "event_id": "EVT-024",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 00:08:22"
+  },
+  {
+    "event_id": "EVT-025",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 00:10:31"
+  },
+  {
+    "event_id": "EVT-026",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 00:12:16"
+  },
+  {
+    "event_id": "EVT-027",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 00:14:01"
+  },
+  {
+    "event_id": "EVT-028",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 00:33:18"
+  },
+  {
+    "event_id": "EVT-029",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 00:44:17"
+  },
+  {
+    "event_id": "EVT-030",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 00:46:36"
+  },
+  {
+    "event_id": "EVT-031",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 00:56:45"
+  },
+  {
+    "event_id": "EVT-032",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 01:09:55"
+  },
+  {
+    "event_id": "EVT-033",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 01:20:44"
+  },
+  {
+    "event_id": "EVT-034",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 01:29:46"
+  },
+  {
+    "event_id": "EVT-035",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 01:48:46"
+  },
+  {
+    "event_id": "EVT-036",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 01:49:14"
+  },
+  {
+    "event_id": "EVT-037",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 01:49:52"
+  },
+  {
+    "event_id": "EVT-038",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 01:51:05"
+  },
+  {
+    "event_id": "EVT-039",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 01:57:26"
+  },
+  {
+    "event_id": "EVT-040",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 02:02:22"
+  },
+  {
+    "event_id": "EVT-041",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Air",
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 03:15:48"
+  },
+  {
+    "event_id": "EVT-042",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 03:26:39"
+  },
+  {
+    "event_id": "EVT-043",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 03:46:02"
+  },
+  {
+    "event_id": "EVT-044",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 03:49:02"
+  },
+  {
+    "event_id": "EVT-045",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 03:52:55"
+  },
+  {
+    "event_id": "EVT-046",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 03:56:50"
+  },
+  {
+    "event_id": "EVT-047",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 04:02:25"
+  },
+  {
+    "event_id": "EVT-048",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 04:02:35"
+  },
+  {
+    "event_id": "EVT-049",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 04:14:04"
+  },
+  {
+    "event_id": "EVT-050",
+    "event_type": "Unknown",
+    "location": "Unknown",
+    "severity": 5,
+    "lesson_learned": "No direct memory match. Proceeding with standard probability models.",
+    "chosen_route": "Road_bypass",
+    "early_action_recommended": "Recommended",
+    "alternative_routes": [
+      "Road_bypass",
+      "Air",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.0,
+    "timestamp": "2026-03-28 04:33:21"
   }
 ]
