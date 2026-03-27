@@ -1,0 +1,51 @@
+{
+  "strategic_lesson": "Last time a flash flood occurred on NH-66, air freight was 3x faster but 2x the cost, resulting in a net positive for shipments above $150k.",
+  "matched_event_id": "EVT-001",
+  "match_confidence": 0.95,
+  "early_action_recommended": true,
+  "alternative_routes": [
+    "Road_bypass",
+    "Rail"
+  ],
+  "recommended_mode": "Air",
+  "risk_assessment": "LOW",
+  "bias_factor": 1.2,
+  "simulation_details": [
+    {
+      "mode": "Air",
+      "iterations": 100,
+      "mean_time": 0.481,
+      "std_time": 0.135,
+      "min_time": 0.192,
+      "max_time": 0.869,
+      "p_arrival_within_target": 1.0,
+      "cdf_probability": 1.0,
+      "target_window": 2.0
+    },
+    {
+      "mode": "Rail",
+      "iterations": 100,
+      "mean_time": 1.995,
+      "std_time": 0.25,
+      "min_time": 1.355,
+      "max_time": 2.526,
+      "p_arrival_within_target": 0.46,
+      "cdf_probability": 0.507,
+      "target_window": 2.0
+    },
+    {
+      "mode": "Road_bypass",
+      "iterations": 100,
+      "mean_time": 1.185,
+      "std_time": 0.527,
+      "min_time": 0.1,
+      "max_time": 2.447,
+      "p_arrival_within_target": 0.94,
+      "cdf_probability": 0.939,
+      "target_window": 2.0
+    }
+  ],
+  "reasoning": "Air freight has the highest probability of arrival within the target window (1.0) and the lowest mean delivery time (0.481), aligning with the strategic lesson that air freight was 3x faster in similar scenarios.",
+  "agent_thoughts": "[2026-03-27 20:33:40] Strategic Insight: Matched event_id=EVT-001, bias_factor=1.2\n[2026-03-27 20:33:40] Simulator: Mode=Air, mean=0.481d, P(arrival)=1.0\n[2026-03-27 20:33:40] Simulator: Mode=Rail, mean=1.995d, P(arrival)=0.46\n[2026-03-27 20:33:40] Simulator: Mode=Road_bypass, mean=1.185d, P(arrival)=0.94\n[2026-03-27 20:33:41] Oracle: Recommended Air with 0.95 confidence",
+  "timestamp": "2026-03-27 20:33:41"
+}
