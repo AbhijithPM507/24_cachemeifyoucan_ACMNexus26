@@ -367,3 +367,26 @@
 
 ### Issues Faced
 - **UI Reset Stall**: The Reset button was initially failing to clear nested file system glob patterns for MP3s; patched with absolute `Path` normalization.
+
+## 00:50
+
+### Features Added
+
+- Engineered a **Premium Interactive Logistics Dashboard** overhaul:
+    - Implemented **Multi-Modal Vector Selection** (Ship, Truck, Rail, Air) with real-time UI switching.
+    - Integrated **High-Fidelity Path Simulation** for key Indian corridors (NH-66, Salem-Bangalore AH-43, South Coastal Spine).
+    - Developed a **Dynamic Telemetry Engine** using the Haversine formula to calculate accurate distances (km) and supply chain ETAs.
+    - Switched map rendering to a **No-Key-Required Cyberpunk Theme** with custom Purple Neon Overlays.
+    - Relocated the **Chaos Trigger System** to the Sidebar to maximize the main monitoring real estate.
+    - Stabilized the **decision-matching logic** to ensure transport recommendations persist in the UI after pipeline cleanup.
+
+### Files Modified
+
+- `01_scout_module/dashboard.py`
+- `CHANGELOG.md`
+- `progress/4.md`
+
+### Issues Faced
+
+- **Mapbox API Block**: Map tiles were failing on premium dark-v10 style due to missing keys; resolved by injecting a synthetic neon filter over the default Deck.gl layer.
+- **Race Condition in Cleanup**: The Manager Agent was deleting Intel output before the UI could render the recommended mode; patched by sourcing the transport mode directly from the persistent `final_results.json` object.
