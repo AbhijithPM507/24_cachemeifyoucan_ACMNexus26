@@ -346,26 +346,27 @@ with col_left:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("<h2 style='color: white;'>Live Risk Dashboard</h2>", unsafe_allow_html=True)
     
+    # A. Pre-load JSONs for step analysis
     final_res = load_json(FINAL_RESULTS_PATH)
+    intel_data = load_json(INTEL_PATH)
+    analyst_data = load_json(ANALYST_PATH)
+    
     if final_res:
-        # A. ROI Metric
+        # --- PHASE 4: MANAGER 
         roi = str(final_res.get("projected_savings", "---"))
         pulse_class = "metric-value roi-highlight" if demo_mode else "metric-value"
         st.markdown(f'<div class="{pulse_class}">{roi}</div>', unsafe_allow_html=True)
         st.markdown('<div class="metric-label">Projected Savings</div><br>', unsafe_allow_html=True)
         
-        # B. Alert / Briefing
         briefing = final_res.get("briefing_text", "No executive summary provided.")
         st.info(f"📋 **Manager Briefing:** {briefing}")
         st.write("")
         
-        # C. Audio Player
         mp3_path = final_res.get("mp3_path")
         if mp3_path and os.path.exists(mp3_path):
             st.audio(mp3_path, format="audio/mp3")
             st.write("")
         
-        # D. Action Buttons
         btn_c1, btn_c2 = st.columns(2)
         with btn_c1:
             if st.button("✅ Approve Reroute", use_container_width=True):
@@ -375,8 +376,36 @@ with col_left:
             if st.button("❌ Reject", use_container_width=True):
                 st.error("Reroute rejected. Maintaining structural hold.")
                 time.sleep(2)
+
+    elif intel_data:
+        # --- PHASE 3: INTEL COORDINATOR
+        mode_reco = intel_data.get("recommended_mode", "UNKNOWN").upper()
+        pulse_class = "metric-value pulse-text" if demo_mode else "metric-value" 
+        st.markdown(f'<div class="{pulse_class}" style="color: #38bdf8;">{mode_reco}</div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-label">SIMULATOR RECOMMENDED ROUTE</div><br>', unsafe_allow_html=True)
+        
+        conf = float(intel_data.get("match_confidence", 0.0)) * 100
+        st.info(f"🧠 **Strategist Pipeline Match:** Event intercepted with {conf:.1f}% confidence.")
+        
+        st.write("")
+        st.markdown('<div class="empty-state">Simulations processed. Awaiting Manager Agent final ROI calculation & audio generation...</div>', unsafe_allow_html=True)
+
+    elif analyst_data:
+        # --- PHASE 2: ANALYST
+        risk_val = analyst_data.get("total_value_at_risk", 0)
+        pulse_class = "metric-value"
+        st.markdown(f'<div class="{pulse_class}" style="color: #ef4444;">₹ {risk_val:,}</div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-label">TOTAL INR AT RISK</div><br>', unsafe_allow_html=True)
+        
+        shipment_count = len(analyst_data.get("affected_shipments", []))
+        st.warning(f"📊 **Analyst Warning:** {shipment_count} shipments caught in blast radius. Calculating routing permutations...")
+        
+        st.write("")
+        st.markdown('<div class="empty-state">Awaiting Oracle Simulator & Strategist Agent processing...</div>', unsafe_allow_html=True)
+
     else:
-        st.markdown('<div class="empty-state">Waiting for Final Manager Agent results... Ensure all modules have executed safely.</div>', unsafe_allow_html=True)
+        # --- PHASE 1: AWAITING CHAOS
+        st.markdown('<div class="empty-state">Waiting for system signals. Initiate Chaos to begin matrix visualization.</div>', unsafe_allow_html=True)
         
     st.markdown("</div>", unsafe_allow_html=True)
 
