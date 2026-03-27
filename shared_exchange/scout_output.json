@@ -1,15 +1,15 @@
 {
-  "description": "The bridge closure in Kochi may cause traffic congestion and delays for commuters. This event is likely to affect travel times on NH-66.",
-  "location": "Kochi",
+  "description": "Port strike in Cochin Port resulted in a 21-hour delay. Union strike has caused disruption to shipping operations.",
+  "location": "Cochin Port",
   "severity": "HIGH",
-  "disruption_type": "infrastructure",
-  "agent_thoughts": "The signal mentions a bridge closure, which is a significant infrastructure disruption, hence the high severity rating. The fact that it's on a national highway (NH-66) and in a major city (Kochi) also supports this assessment.",
+  "disruption_type": "strike",
+  "agent_thoughts": "Considering the severity of the delay and the cause of the disruption, this is a significant impact on the supply chain. It is crucial to receive updates on the strike's resolution to mitigate further disruptions.",
   "raw_signal": {
-    "id": "EVT-6136",
-    "event": "bridge closure",
-    "location": "Kochi",
-    "timestamp": "2026-03-27T17:58:09.474166+00:00",
-    "source": "NHAI_feed",
-    "highway": "NH-66"
+    "id": "EVT-2102",
+    "event": "port strike",
+    "location": "Cochin Port",
+    "timestamp": "2026-03-27T18:15:15.199784+00:00",
+    "source": "union_feed",
+    "delay_hours": 21
   }
 }

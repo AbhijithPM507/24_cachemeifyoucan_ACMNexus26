@@ -37,7 +37,7 @@ def get_llm_response(prompt: str) -> str:
     }
     
     data = {
-        "model": "llama-3.3-70b-versatile",
+        "model": "llama-3.1-8b-instant",
         "messages": [
             {"role": "system", "content": "You are a perception scout agent for a supply chain system. Convert raw chaos into structured data. Output ONLY JSON exactly as requested in the prompt with no other text."},
             {"role": "user", "content": prompt}

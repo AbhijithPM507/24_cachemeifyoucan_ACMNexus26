@@ -1,8 +1,8 @@
 {
-  "id": "EVT-6136",
-  "event": "bridge closure",
-  "location": "Kochi",
-  "timestamp": "2026-03-27T17:58:09.474166+00:00",
-  "source": "NHAI_feed",
-  "highway": "NH-66"
+  "id": "EVT-2102",
+  "event": "port strike",
+  "location": "Cochin Port",
+  "timestamp": "2026-03-27T18:15:15.199784+00:00",
+  "source": "union_feed",
+  "delay_hours": 21
 }

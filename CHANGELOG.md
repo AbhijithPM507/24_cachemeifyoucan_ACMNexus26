@@ -331,3 +331,24 @@
 
 - Intel payload contract drift caused route parsing failures (`alternative_routes` as strings instead of objects), resolved with schema-flexible mapping in Manager.
 - ROI could be inaccurate when Intel omitted direct financial fields, resolved with Analyst fallback for `total_value_at_risk`.
+
+
+## 23:48
+
+### Features Added
+- Migrated all AI agents across the pipeline (Scout, Analyst, Strategist, Simulator) to the **`llama-3.1-8b-instant`** model to resolve Groq model-specific TPD (Tokens Per Day) rate limits.
+- Engineered a **"Master Reset"** sidebar interface button to facilitate zero-state demo restarts by purging all `shared_exchange` JSON payloads and cleaning the `04_manager_module` audio cache.
+- Synchronized Dashboard UI rendering with the team's official `manager_agent.py` schema (ROI dictionary structures and audio narration placeholders).
+- Implemented global `gTTS` (Google Text-to-Speech) support for the executive briefing stage.
+
+### Files Modified
+- `01_scout_module/dashboard.py`
+- `01_scout_module/scout_agent.py`
+- `02_analyst_module/analyst_agent.py`
+- `03_intel_module/strategist_agent.py`
+- `03_intel_module/simulator_agent.py`
+- `CHANGELOG.md`
+
+### Issues Faced
+- **Groq Rate Limit Exceeded**: The 70B model reached daily token capacity mid-demonstration; resolved by switching to the faster, more flexible 8B-instant model.
+- **Path Resolution Errors**: Standard cross-module imports were failing during Streamlit execution; patched with absolute `sys.path` injections and module-level `os.path` normalization.

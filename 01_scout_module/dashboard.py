@@ -429,6 +429,9 @@ with col_left:
                 }
                 with open(INTEL_PATH, "w") as f:
                     json.dump(intel_output, f, indent=2)
+            # --- TRIGGER MANAGER AGENT (FINAL) ---
+            from manager_agent import run_manager_pipeline_once
+            run_manager_pipeline_once()
 
             event_name = event_data.get('event', 'Unknown Event').upper()
             location = event_data.get('location', 'Unknown Location')
@@ -455,29 +458,35 @@ with col_left:
     scout_data = load_json(SCOUT_PATH)
     
     if final_res:
-        # --- PHASE 4: MANAGER 
-        roi = str(final_res.get("projected_savings", "---"))
-        pulse_class = "metric-value roi-highlight" if demo_mode else "metric-value"
-        st.markdown(f'<div class="{pulse_class}">{roi}</div>', unsafe_allow_html=True)
-        st.markdown('<div class="metric-label">Projected Savings</div><br>', unsafe_allow_html=True)
+        # --- PHASE 4: MANAGER (Team Schema Update)
+        roi_data = final_res.get("roi", {})
+        savings = roi_data.get("savings", "---")
         
-        briefing = final_res.get("briefing_text", "No executive summary provided.")
-        st.info(f"📋 **Manager Briefing:** {briefing}")
+        pulse_class = "metric-value roi-highlight" if demo_mode else "metric-value"
+        st.markdown(f'<div class="{pulse_class}">₹ {savings:,}</div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-label">Projected Logistics Savings</div><br>', unsafe_allow_html=True)
+        
+        briefing = final_res.get("summary_text") or final_res.get("briefing_text", "No executive summary provided.")
+        st.info(f"🎙️ **Executive Briefing:** {briefing}")
         st.write("")
         
-        mp3_path = final_res.get("mp3_path")
-        if mp3_path and os.path.exists(mp3_path):
-            st.audio(mp3_path, format="audio/mp3")
+        # Audio from Manager module
+        audio_path = os.path.join(BASE_DIR, "04_manager_module", "alert_english.mp3")
+        if not os.path.exists(audio_path):
+            audio_path = os.path.join(BASE_DIR, "04_manager_module", "alert.mp3")
+            
+        if os.path.exists(audio_path):
+            st.audio(audio_path, format="audio/mp3")
             st.write("")
         
         btn_c1, btn_c2 = st.columns(2)
         with btn_c1:
             if st.button("✅ Approve Reroute", use_container_width=True):
-                st.success("Reroute execution authorized. Logistics pivoting engaged.")
+                st.success("Logistics pivot executed. Reroute protocol active.")
                 time.sleep(2)
         with btn_c2:
             if st.button("❌ Reject", use_container_width=True):
-                st.error("Reroute rejected. Maintaining structural hold.")
+                st.error("Reroute rejected. Structural hold maintained.")
                 time.sleep(2)
 
     elif intel_data:
