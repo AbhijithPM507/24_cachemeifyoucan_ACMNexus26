@@ -47,3 +47,54 @@
 
 ### Issues Faced
 - None
+
+## 20:45
+
+### Features Added
+- Created `02_analyst_module/shipments.json` with 15 shipments (NH-66 routes, varied cargo types)
+- Created `02_analyst_module/analyst_agent.py` with Groq AI integration for risk assessment
+- Added route-to-cities mapping (NH-66, NH-44, NH-48, Sea Route)
+- Implemented risk scoring calculation (priority + severity + cargo risk)
+- Added programmatic `generate_reason()` function for shipment-specific disruption reasons
+- Added LLM integration with `llama-3.3-70b-versatile` model
+- Implemented strict filtering: only NH-66 routes affected by Kochi road closure
+- Added currency enforcement (INR/₹) throughout prompts
+- Created `02_analyst_module/AGENTS.md` documentation
+- Created `shared_exchange/scout_output.json` sample disruption event
+
+### Files Modified
+- 02_analyst_module/analyst_agent.py
+- 02_analyst_module/shipments.json
+- 02_analyst_module/AGENTS.md
+- shared_exchange/scout_output.json
+- CHANGELOG.md
+
+### Files Added
+- 02_analyst_module/analyst_agent.py
+- 02_analyst_module/shipments.json
+- 02_analyst_module/AGENTS.md
+- shared_exchange/scout_output.json
+- progress/2.txt
+
+### Issues Faced
+- Groq model `mixtral-8x7b-32768` decommissioned, updated to `llama-3.3-70b-versatile`
+- LLM not populating reason field, added programmatic reason generation
+- NH-48 and Sea Route incorrectly flagged, implemented stricter Kochi-specific filtering
+
+## 20:55
+
+### Features Added
+- Updated scout_output.json with Kochi road closure event (ROAD_CLOSURE at Kochi)
+- Added forceful JSON instruction in LLM prompt ("YOUR ENTIRE RESPONSE MUST BE ONLY THE JSON OBJECT")
+- Implemented programmatic reason generation for all shipments (no empty reasons)
+- Added save_output() function to parse and use LLM JSON response directly
+- Updated analyst_output.json format with specific shipment reasons
+
+### Files Modified
+- 02_analyst_module/analyst_agent.py
+- shared_exchange/scout_output.json
+- shared_exchange/analyst_output.json
+
+### Issues Faced
+- LLM ignoring reason field instructions, added explicit requirement and fallback generation
+- Currency mixing ($ and INR), added INR (₹) enforcement at prompt top and in agent_thoughts

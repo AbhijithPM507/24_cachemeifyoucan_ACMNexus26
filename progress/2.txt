@@ -1,0 +1,27 @@
+Analyst Agent Module - Groq AI Implementation
+===============================================
+Updated: 2026-03-27
+
+## Files Created/Updated:
+1. analyst_agent.py - Groq API integration with hybrid route matching
+2. shipments.json - 15 shipments (NH-66: 9, NH-44: 2, NH-48: 2, Sea Route: 2)
+3. AGENTS.md - Complete agent documentation
+4. scout_output.json - Sample disruption event
+
+## Features Implemented:
+- Route-to-cities mapping for disruption matching
+- Risk score calculation (priority + severity + cargo)
+- V_risk calculation with LOW/MEDIUM/HIGH classification
+- Groq LLM integration (with fallback to rule-based)
+- agent_thoughts + recommended_action for next agent
+- Watch mode for auto-execution
+
+## Latest Test Result:
+- Disruption: PORT_CLOSURE at Mumbai (HIGH)
+- Affected: 11 shipments
+- V_risk: ₹27,87,500
+- Risk Level: HIGH
+
+## Dependencies:
+- groq (pip install groq)
+- GROQ_API_KEY env var (optional)
