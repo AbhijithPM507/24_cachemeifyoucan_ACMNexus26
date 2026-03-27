@@ -171,5 +171,20 @@
     ],
     "bias_factor_applied": 1.2,
     "timestamp": "2026-03-27 22:20:22"
+  },
+  {
+    "event_id": "EVT-008",
+    "event_type": "Flood",
+    "location": "NH-66, Kochi",
+    "severity": "HIGH",
+    "lesson_learned": "Last time a flash flood occurred on NH-66, air freight was 3x faster but 2x the cost, resulting in a net positive for shipments above $150k.",
+    "chosen_route": "Air",
+    "early_action_recommended": "Yes",
+    "alternative_routes": [
+      "Road_bypass",
+      "Rail"
+    ],
+    "bias_factor_applied": 1.2,
+    "timestamp": "2026-03-27 22:27:45"
   }
 ]
