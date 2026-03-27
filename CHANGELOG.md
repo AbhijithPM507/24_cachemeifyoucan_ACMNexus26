@@ -47,3 +47,36 @@
 
 ### Issues Faced
 - None
+
+## 20:45
+
+### Features Added
+- Created `02_analyst_module/shipments.json` with 15 shipments (NH-66 routes, varied cargo types)
+- Created `02_analyst_module/analyst_agent.py` with Groq AI integration for risk assessment
+- Added route-to-cities mapping (NH-66, NH-44, NH-48, Sea Route)
+- Implemented risk scoring calculation (priority + severity + cargo risk)
+- Added programmatic `generate_reason()` function for shipment-specific disruption reasons
+- Added LLM integration with `llama-3.3-70b-versatile` model
+- Implemented strict filtering: only NH-66 routes affected by Kochi road closure
+- Added currency enforcement (INR/₹) throughout prompts
+- Created `02_analyst_module/AGENTS.md` documentation
+- Created `shared_exchange/scout_output.json` sample disruption event
+
+### Files Modified
+- 02_analyst_module/analyst_agent.py
+- 02_analyst_module/shipments.json
+- 02_analyst_module/AGENTS.md
+- shared_exchange/scout_output.json
+- CHANGELOG.md
+
+### Files Added
+- 02_analyst_module/analyst_agent.py
+- 02_analyst_module/shipments.json
+- 02_analyst_module/AGENTS.md
+- shared_exchange/scout_output.json
+- progress/2.txt
+
+### Issues Faced
+- Groq model `mixtral-8x7b-32768` decommissioned, updated to `llama-3.3-70b-versatile`
+- LLM not populating reason field, added programmatic reason generation
+- NH-48 and Sea Route incorrectly flagged, implemented stricter Kochi-specific filtering
