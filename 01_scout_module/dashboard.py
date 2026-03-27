@@ -7,8 +7,10 @@ import pydeck as pdk
 import streamlit as st
 from pathlib import Path
 
-# Add the current directory to path so we can import local modules easily
+# Add the current directory and other agent modules to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "02_analyst_module"))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "03_intel_module"))
 
 from chaos_trigger import trigger_chaos
 from scout_agent import process_signal
@@ -309,7 +311,7 @@ def render_map(location_name):
     )
     
     r = pdk.Deck(
-        map_style='carto-dark',
+        map_style=None, # Use default Deck.gl styles to avoid Mapbox key dependencies
         layers=[glow_layer, layer],
         initial_view_state=view_state,
         tooltip={"text": f"⚠️ Disruption Zone: {location_name}"}
@@ -399,6 +401,37 @@ with col_left:
                 
             process_signal()
             
+            # --- TRIGGER ANALYST AGENT ---
+            from analyst_agent import run_analyst_agent
+            run_analyst_agent()
+            
+            # --- TRIGGER INTEL COORDINATOR ONE-OFF (OR RUN COMPONENT) ---
+            # Instead of the infinite loop coordinator, we call the specific runs
+            from strategist_agent import run_strategist
+            from simulator_agent import run_simulator
+            
+            a_data = load_json(ANALYST_PATH)
+            if a_data:
+                strat_res = run_strategist(a_data)
+                sim_res = run_simulator(a_data, strat_res)
+                
+                intel_output = {
+                    "strategic_lesson": strat_res.get("strategic_lesson", ""),
+                    "matched_event_id": strat_res.get("matched_event_id", -1),
+                    "match_confidence": sim_res.get("oracle_recommendation", {}).get("confidence_score", 0.0),
+                    "early_action_recommended": True if sim_res.get("oracle_recommendation", {}).get("confidence_score", 0.0) >= 0.7 else False,
+                    "alternative_routes": sim_res.get("oracle_recommendation", {}).get("alternative_modes", []),
+                    "recommended_mode": sim_res.get("oracle_recommendation", {}).get("recommended_mode", "Unknown"),
+                    "risk_assessment": sim_res.get("oracle_recommendation", {}).get("risk_assessment", "MEDIUM"),
+                    "bias_factor": strat_res.get("bias_factor", 1.0),
+                    "simulation_details": sim_res.get("simulation_results", []),
+                    "reasoning": sim_res.get("oracle_recommendation", {}).get("reasoning", ""),
+                    "agent_thoughts": "Strategist and Simulator complete analysis loop.",
+                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+                }
+                with open(INTEL_PATH, "w") as f:
+                    json.dump(intel_output, f, indent=2)
+
             event_name = event_data.get('event', 'Unknown Event').upper()
             location = event_data.get('location', 'Unknown Location')
             st.warning(f"⚠️ **Chaos Injected:** {event_name} at {location}")

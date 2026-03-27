@@ -1,8 +1,8 @@
 {
-  "id": "EVT-2388",
-  "event": "bridge closure",
-  "location": "Chennai",
-  "timestamp": "2026-03-27T17:36:59.071141+00:00",
-  "source": "NHAI_feed",
-  "highway": "NH-85"
+  "id": "EVT-3581",
+  "event": "flash flood",
+  "location": "Mangalore",
+  "timestamp": "2026-03-27T17:50:30.567305+00:00",
+  "source": "IMD_alert",
+  "severity_raw": 4.0
 }

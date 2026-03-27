@@ -1,15 +1,15 @@
 {
-  "description": "A bridge closure has been reported in Chennai, which may cause traffic congestion and delays. The affected highway is NH-85.",
-  "location": "Chennai",
+  "description": "A flash flood alert has been issued for Mangalore, indicating a potentially life-threatening situation. The severity of the alert suggests a significant impact on the area.",
+  "location": "Mangalore",
   "severity": "HIGH",
-  "disruption_type": "infrastructure",
-  "agent_thoughts": "The signal indicates a bridge closure, which is a significant infrastructure disruption that can have a substantial impact on traffic flow, hence categorizing it as HIGH severity. The disruption type is classified as infrastructure as it involves a structural issue with the bridge.",
+  "disruption_type": "weather",
+  "agent_thoughts": "The severity level of 4.0 indicates a high level of danger, and the fact that it's a flash flood suggests a rapid onset of flooding, which can be extremely disruptive to the supply chain. The IMD_alert source is a reliable one, which increases the confidence in this assessment.",
   "raw_signal": {
-    "id": "EVT-2388",
-    "event": "bridge closure",
-    "location": "Chennai",
-    "timestamp": "2026-03-27T17:36:59.071141+00:00",
-    "source": "NHAI_feed",
-    "highway": "NH-85"
+    "id": "EVT-3581",
+    "event": "flash flood",
+    "location": "Mangalore",
+    "timestamp": "2026-03-27T17:50:30.567305+00:00",
+    "source": "IMD_alert",
+    "severity_raw": 4.0
   }
 }
