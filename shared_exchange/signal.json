@@ -1,8 +1,8 @@
 {
-  "id": "EVT-8321",
-  "event": "flash flood",
-  "location": "Kochi",
-  "timestamp": "2026-03-27T14:31:34+00:00",
+  "id": "EVT-5260",
+  "event": "cyclone warning",
+  "location": "Perumbavoor",
+  "timestamp": "2026-03-27T16:42:16.444147+00:00",
   "source": "IMD_alert",
-  "severity_raw": 8.5
+  "severity_raw": 2.0
 }
