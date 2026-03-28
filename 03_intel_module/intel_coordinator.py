@@ -150,14 +150,31 @@ def run_coordinator():
                 else:
                     early_action = False
                 
+                projected_savings = recommended.get("projected_savings", 50000.0)
+                route_cities = recommended.get("route_cities", ["Mumbai", "Pune", "Bangalore"])
+                cargo_weight = recommended.get("cargo_weight_tonnes", 12.0)
+                
+                from capacity_matcher import generate_open_manifest
+                empty_space = 20.0 - cargo_weight
+                capacity_result = generate_open_manifest(route_cities, empty_space)
+                subsidy_earned = capacity_result.get("total_subsidy_earned_inr", 0.0)
+                total_roi = projected_savings + subsidy_earned
+                
                 intel_output = {
                     "strategic_lesson": strategist_output.get("strategic_lesson", ""),
                     "matched_event_id": strategist_output.get("matched_event_id", -1),
                     "match_confidence": match_confidence,
                     "early_action_recommended": early_action,
                     "alternative_routes": recommended.get("alternative_modes", []),
+                    "recommended_route": route_cities,
                     "recommended_mode": recommended.get("recommended_mode", "Unknown"),
                     "risk_assessment": recommended.get("risk_assessment", "MEDIUM"),
+                    "projected_savings": projected_savings,
+                    "cargo_weight_tonnes": cargo_weight,
+                    "capacity_subsidy_earned_inr": subsidy_earned,
+                    "total_roi_with_subsidy": total_roi,
+                    "empty_space_monitized_tonnes": capacity_result.get("total_space_sold_tonnes", 0),
+                    "matched_vendors_count": len(capacity_result.get("matched_contracts", [])),
                     "bias_factor": strategist_output.get("bias_factor", 1.0),
                     "simulation_details": simulator_output.get("simulation_results", []),
                     "reasoning": recommended.get("reasoning", ""),

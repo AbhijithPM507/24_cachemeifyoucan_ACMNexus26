@@ -342,6 +342,12 @@
 
 ### Features Added
 
+- Initial implementation placed logic in 04_manager_module which violated module isolation constraints
+- Resolved by consolidating all capacity sharing logic in 03_intel_module with shared_exchange for data persistence
+- Verified end-to-end flow generates valid manifest output with vendor matches
+## 22:56
+
+### Features Added
 - Engineered a strict geographical coupling between `01_scout_module/chaos_trigger.py` and the `02_analyst_module/analyst_agent.py` routing map.
 - Hardcoded the generated disruption targets (`Kochi`, `Mumbai`, `Chennai`, `Bangalore`, etc.) to guarantee 100% downstream shipment interception for consistent hackathon demo logic.
 
@@ -357,6 +363,15 @@
 
 ### Features Added
 
+- `01_scout_module/chaos_trigger.py`
+
+### Issues Faced
+- Scout generated locations (e.g. `Thrissur`, `Perumbavoor`) were bypassing the Analyst Agent's exact string-matching logic, resulting in ₹0 risk pipelines. Resolved safely via node synchronization.
+
+
+## 23:04
+
+### Features Added
 - Developed an interactive Reactive Multi-stage execution pipeline within the Streamlit Control Panel to visualize intermediate `02_analyst_module` and `03_intel_module` operations.
 - Intercepted Python synchronous stalls by leveraging independent UI rendering states (`analyst_data` & `intel_data`) that dynamically output ₹ INR Risk Metrics and AI Oracle predictions to the presenter natively before the `04_manager_module` resolves.
 
@@ -372,6 +387,15 @@
 
 ### Features Added
 
+- `01_scout_module/dashboard.py`
+
+### Issues Faced
+- The "Live Risk Dashboard" component presented blank empty states visually during intermediate downstream processes. Reprogrammed `dashboard.py` execution loops to actively poll and cleanly hydrate UI values sequentially as JSON endpoints are birthed in `shared_exchange`.
+
+
+## 23:25
+
+### Features Added
 - Unified the entire 5-step multi-agent pipeline into the Streamlit **Chaos Button** sequence (Chaos -> Scout -> Analyst -> Intel -> Manager).
 - Created `04_manager_module/manager_agent.py` to calculate projected ROI and generate executive summaries for the "Final Decision" stage.
 - Upgraded geographical mapping to use OpenSource Pydeck styling, eliminating Mapbox API key dependencies and resolving black background rendering.
@@ -389,6 +413,9 @@
 
 ### Issues Faced
 
+- `04_manager_module/manager_agent.py`
+
+### Issues Faced
 - The "Demo Progression Sequence" was stalling at Step 2 due to individual agents not being triggered in the UI loop; resolved by encapsulating the entire sequential pipeline into the primary `st.button` callback.
 - Pydeck map tiles were failing to render due to Mapbox key requirements; patched with generic Carto Dark tile providers.
 
@@ -420,6 +447,10 @@
 
 ### Features Added
 
+
+## 23:48
+
+### Features Added
 - Migrated all AI agents across the pipeline (Scout, Analyst, Strategist, Simulator) to the **`llama-3.1-8b-instant`** model to resolve Groq model-specific TPD (Tokens Per Day) rate limits.
 - Engineered a **"Master Reset"** sidebar interface button to facilitate zero-state demo restarts by purging all `shared_exchange` JSON payloads and cleaning the `04_manager_module` audio cache.
 - Synchronized Dashboard UI rendering with the team's official `manager_agent.py` schema (ROI dictionary structures and audio narration placeholders).
@@ -443,6 +474,13 @@
 
 ### Features Added
 
+- **Groq Rate Limit Exceeded**: The 70B model reached daily token capacity mid-demonstration; resolved by switching to the faster, more flexible 8B-instant model.
+- **Path Resolution Errors**: Standard cross-module imports were failing during Streamlit execution; patched with absolute `sys.path` injections and module-level `os.path` normalization.
+
+
+## 00:00 (Final Release)
+
+### Features Added
 - Finalized Dashboard UI polish: Corrected "Master Reset" placement in the sidebar and ensured "Guided Demo Mode" defaults to ON for the jury presentation.
 - Verified end-to-end ROI logic: Confirmed the Analyst (Value at Risk) to Manager (Net Savings) financial handoff accuracy.
 - Enforced a zero-state baseline: Purged all legacy `shared_exchange` JSONs and audio artifacts to ensure the first project trigger is fresh.
@@ -467,6 +505,12 @@
   - Switched map rendering to a **No-Key-Required Cyberpunk Theme** with custom Purple Neon Overlays.
   - Relocated the **Chaos Trigger System** to the Sidebar to maximize the main monitoring real estate.
   - Stabilized the **decision-matching logic** to ensure transport recommendations persist in the UI after pipeline cleanup.
+    - Implemented **Multi-Modal Vector Selection** (Ship, Truck, Rail, Air) with real-time UI switching.
+    - Integrated **High-Fidelity Path Simulation** for key Indian corridors (NH-66, Salem-Bangalore AH-43, South Coastal Spine).
+    - Developed a **Dynamic Telemetry Engine** using the Haversine formula to calculate accurate distances (km) and supply chain ETAs.
+    - Switched map rendering to a **No-Key-Required Cyberpunk Theme** with custom Purple Neon Overlays.
+    - Relocated the **Chaos Trigger System** to the Sidebar to maximize the main monitoring real estate.
+    - Stabilized the **decision-matching logic** to ensure transport recommendations persist in the UI after pipeline cleanup.
 
 ### Files Modified
 
