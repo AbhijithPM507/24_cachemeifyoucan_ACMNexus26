@@ -728,8 +728,8 @@ if st.sidebar.button("INJECT CHAOS EVENT", use_container_width=True, type="prima
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
             }
             with open(INTEL_PATH, "w") as f: json.dump(intel_output, f, indent=2)
-        from manager_agent import run_manager_pipeline_once
-        run_manager_pipeline_once()
+        from manager_agent import run_pipeline_once
+        run_pipeline_once()
         st.rerun()
 
 st.sidebar.markdown("---")
@@ -740,6 +740,39 @@ if st.sidebar.button("Master Reset", use_container_width=True):
     for f in (BASE_DIR / "04_manager_module").glob("*.mp3"): f.unlink()
     st.sidebar.success("System Purged.")
     time.sleep(1); st.rerun()
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("Telegram Integration")
+telegram_status_placeholder = st.sidebar.empty()
+try:
+    from manager_agent import send_telegram_alert, poll_telegram_updates
+    import os
+    import threading
+    from dotenv import load_dotenv
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    load_dotenv(os.path.join(project_root, ".env"))
+    telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
+    telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    if telegram_token and telegram_chat_id:
+        if "telegram_poller_started" not in st.session_state:
+            telegram_poller_thread = threading.Thread(target=poll_telegram_updates, daemon=True)
+            telegram_poller_thread.start()
+            st.session_state.telegram_poller_started = True
+        telegram_status_placeholder.success("Telegram Bot: Connected & Listening")
+        
+        st.sidebar.markdown("**Send Alert**")
+        alert_type = st.sidebar.selectbox("Alert Type", ["Flood", "Accident", "Road Block", "Bridge Collapse"])
+        alert_location = st.sidebar.text_input("Location", "NH-66")
+        if st.sidebar.button("Send Alert", use_container_width=True):
+            intel_data = load_json(INTEL_PATH)
+            route_desc = intel_data.get("recommended_mode", "Road") if intel_data else "Road"
+            mp3_path = BASE_DIR / "04_manager_module" / "alert_ml.mp3"
+            send_telegram_alert(alert_type, alert_location, route_desc, str(mp3_path) if mp3_path.exists() else None)
+            st.sidebar.success(f"{alert_type} alert sent!")
+    else:
+        telegram_status_placeholder.warning("Telegram Bot: Not configured (.env)")
+except Exception as e:
+    telegram_status_placeholder.error(f"Telegram Error: {str(e)[:30]}")
 
 # SECTION 1: HERO HEADER
 st.markdown('''

@@ -52,7 +52,7 @@ def send_telegram_alert(disruption_type, location, route_desc, malayalam_audio_p
     dispatch_text = (
         "🚨 *URGENT DRIVER DISPATCH* 🚨\n\n"
         f"{disruption_type}\n"
-        f"*Estimated Savings:* {location:.2f}\n"
+        f"*Location:* {location}\n"
         f"🛣️ *Assigned Reroute:* {route_desc}\n\n"
         "Please confirm reroute acknowledgement immediately."
     )
@@ -100,19 +100,25 @@ def send_telegram_alert(disruption_type, location, route_desc, malayalam_audio_p
         # Message 2: Audio file upload immediately after text alert.
         url_audio = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendAudio"
         try:
-            with open(malayalam_audio_path, "rb") as audio_file:
-                resp2 = requests.post(
-                    url_audio,
-                    data={"chat_id": TELEGRAM_CHAT_ID},
-                    files={"audio": audio_file},
-                    timeout=30,
-                )
+            if not malayalam_audio_path:
+                resp2 = None
+            else:
+                with open(malayalam_audio_path, "rb") as audio_file:
+                    resp2 = requests.post(
+                        url_audio,
+                        data={"chat_id": TELEGRAM_CHAT_ID},
+                        files={"audio": audio_file},
+                        timeout=30,
+                    )
         except FileNotFoundError:
             resp2 = None
             print(f"⚠️ [Telegram] Audio file not found yet: {malayalam_audio_path}")
         except OSError as error:
             resp2 = None
             print(f"⚠️ [Telegram] Could not open audio file: {error}")
+        except TypeError:
+            resp2 = None
+            print(f"⚠️ [Telegram] Invalid audio path: {malayalam_audio_path}")
 
         # Message 3: Dedicated accident trigger message.
         resp3 = requests.post(
@@ -360,11 +366,11 @@ def poll_telegram_updates():
                     print("🚨 [Swarm Trigger] Driver GPS captured. scout_output.json written with geo location.")
 
         except requests.RequestException as error:
-            print(f"⚠️ [Telegram Poller] Network/API error: {error}")
-            time.sleep(2)
+            print(f"⚠️ [Telegram Poller] Network error (retrying in 5s): {type(error).__name__}")
+            time.sleep(5)
         except Exception as error:
-            print(f"⚠️ [Telegram Poller] Unexpected error: {error}")
-            time.sleep(2)
+            print(f"⚠️ [Telegram Poller] Error (retrying in 5s): {type(error).__name__}")
+            time.sleep(5)
 
 # ==========================================
 # FEATURE 2: AGV WAREHOUSE HANDSHAKE
@@ -445,8 +451,26 @@ def run_pipeline_once():
 
     # 1. Math & ROI
     val_risk = float(analyst_data.get("total_value_at_risk", 50000))
-    routes = intel_data.get("alternative_routes", [{"route_description": "Default Bypass", "cost_per_shipment": 2000}])
-    best_route = routes[0] # Grab highest reliability route
+    routes = intel_data.get("alternative_routes", [])
+    sim_details = intel_data.get("simulation_details", [])
+    recommended_mode = intel_data.get("recommended_mode", "Road")
+    
+    if not routes:
+        best_route = {"route_description": recommended_mode, "cost_per_shipment": 2000}
+    elif isinstance(routes[0], str):
+        route_name = routes[0]
+        best_route = {"route_description": route_name, "cost_per_shipment": 2000}
+    elif isinstance(routes[0], dict):
+        route_dict = routes[0]
+        if "mode" in route_dict:
+            best_route = {"route_description": route_dict.get("mode", recommended_mode), "cost_per_shipment": 2000}
+        elif "route_description" in route_dict:
+            best_route = route_dict
+        else:
+            best_route = {"route_description": recommended_mode, "cost_per_shipment": 2000}
+    else:
+        best_route = {"route_description": recommended_mode, "cost_per_shipment": 2000}
+    
     cost = float(best_route.get("cost_per_shipment", 2000))
     
     savings = (val_risk * 0.8) - cost
@@ -463,7 +487,11 @@ def run_pipeline_once():
     )
     
     try:
-        exec_en, exec_ml = response.choices[0].message.content.strip().split("|")
+        content = response.choices[0].message.content
+        if content:
+            exec_en, exec_ml = content.strip().split("|")
+        else:
+            raise ValueError("Empty response")
     except:
         exec_en = f"Alert: Flood on NH-66. Rerouting via {best_route['route_description']} saving ${savings:.0f}."
         exec_ml = "മുന്നറിയിപ്പ്: NH-66 ൽ വെള്ളപ്പൊക്കം. വഴിതിരിച്ചുവിടുന്നു."
