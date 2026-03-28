@@ -806,7 +806,7 @@ st.sidebar.markdown("---")
 st.sidebar.subheader("Telegram Integration")
 telegram_status_placeholder = st.sidebar.empty()
 try:
-    from manager_agent import send_telegram_alert, poll_telegram_updates
+    from manager_agent import send_telegram_alert, poll_telegram_updates, get_telegram_events
     import os
     import threading
     from dotenv import load_dotenv
@@ -830,6 +830,28 @@ try:
             mp3_path = BASE_DIR / "04_manager_module" / "alert_ml.mp3"
             send_telegram_alert(alert_type, alert_location, route_desc, str(mp3_path) if mp3_path.exists() else None)
             st.sidebar.success(f"{alert_type} alert sent!")
+
+        st.sidebar.markdown("---")
+        st.sidebar.markdown("**Recent Telegram Events**")
+        col_ev1, col_ev2 = st.sidebar.columns([1, 1])
+        if col_ev1.button("🔄 Refresh", use_container_width=True):
+            st.rerun()
+        events = get_telegram_events(limit=5)
+        if events:
+            for evt in reversed(events):
+                evt_type = evt.get("type", "")
+                evt_msg = evt.get("message", "")
+                evt_time = evt.get("timestamp", "")[:19].replace("T", " ")
+                if evt_type == "warehouse_notified":
+                    st.sidebar.info(f"📦 {evt_time}\n{evt_msg}")
+                elif evt_type == "accident_reported":
+                    st.sidebar.warning(f"🚨 {evt_time}\n{evt_msg}")
+                elif evt_type == "swarm_alert":
+                    st.sidebar.error(f"🔔 {evt_time}\n{evt_msg}")
+                else:
+                    st.sidebar.text(f"• {evt_time}\n{evt_msg}")
+        else:
+            st.sidebar.caption("No events yet")
     else:
         telegram_status_placeholder.warning("Telegram Bot: Not configured (.env)")
 except Exception as e:

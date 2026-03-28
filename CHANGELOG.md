@@ -28,6 +28,32 @@
 ### Issues Faced
 
 - **Markdown Parser Collision**: Streamlit's Markdown interpreter was treating indented HTML tags as code blocks when dynamic alert content was empty. Solved by left-flushing all HTML strings.
+## 08:41
+
+### Features Added
+
+- **Telegram Event Logging**: Added `log_telegram_event()` and `get_telegram_events()` functions to track Telegram bot interactions (reroute_confirmed, warehouse_notified, accident_reported, swarm_alert)
+- **Telegram Error Fix**: Fixed TypeError when audio path is None in `send_telegram_alert()` by adding proper null checks
+- **Dashboard UI Integration**: Added Telegram events display in sidebar with refresh button showing recent events with appropriate icons
+- **Kubernetes Deployment**: Created Docker containerization, K8s deployment/service/secrets manifests, and namespace configuration for minikube deployment
+- **WAREHOUSE_CHAT_ID**: Added missing environment variable to .env for warehouse notification support
+
+### Files Modified
+
+- `04_manager_module/manager_agent.py`
+- `01_scout_module/dashboard.py`
+- `.env`
+- `Dockerfile` (new)
+- `k8s/deployment.yaml` (new)
+- `k8s/service.yaml` (new)
+- `k8s/secrets.yaml` (new)
+- `k8s/namespace.yaml` (new)
+- `k8s/kustomization.yaml` (new)
+
+### Issues Faced
+
+- Consul Connect webhook blocking pod creation - resolved by deleting mutating webhook and using dedicated namespace
+- WAREHOUSE_CHAT_ID missing from .env causing warehouse notifications to fail
 
 ## 05:27
 

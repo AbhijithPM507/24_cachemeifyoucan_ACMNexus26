@@ -29,8 +29,38 @@ SCOUT_OUTPUT_PATH = os.path.join(SHARED_DIR, "scout_output.json")
 WAREHOUSE_SCHEDULE_PATH = os.path.join(SHARED_DIR, "warehouse_schedule.json")
 MP3_ENGLISH = os.path.join(MANAGER_DIR, "alert_english.mp3")
 MP3_MALAYALAM = os.path.join(MANAGER_DIR, "alert_malayalam.mp3")
+TELEGRAM_EVENTS_PATH = os.path.join(SHARED_DIR, "telegram_events.json")
 
 POLL_INTERVAL_SECONDS = 2
+
+def log_telegram_event(event_type, message, details=None):
+    try:
+        events = []
+        if os.path.exists(TELEGRAM_EVENTS_PATH):
+            with open(TELEGRAM_EVENTS_PATH, "r") as f:
+                events = json.load(f)
+        event = {
+            "type": event_type,
+            "message": message,
+            "details": details or {},
+            "timestamp": datetime.datetime.now().isoformat()
+        }
+        events.append(event)
+        events = events[-50:]
+        with open(TELEGRAM_EVENTS_PATH, "w") as f:
+            json.dump(events, f, indent=2)
+    except Exception as e:
+        print(f"⚠️ [Telegram] Failed to log event: {e}")
+
+def get_telegram_events(limit=10):
+    try:
+        if os.path.exists(TELEGRAM_EVENTS_PATH):
+            with open(TELEGRAM_EVENTS_PATH, "r") as f:
+                events = json.load(f)
+            return events[-limit:]
+    except Exception:
+        pass
+    return []
 
 # ==========================================
 # FEATURE 1: LIVE TELEGRAM DISPATCHER
@@ -200,6 +230,27 @@ def poll_telegram_updates():
                 callback_data = str(callback.get("data", "")).lower()
                 callback_id = callback.get("id")
 
+                if callback_data == "confirm":
+                    callback_message = callback.get("message", {})
+                    callback_chat_id = callback_message.get("chat", {}).get("id", telegram_chat_id)
+
+                    if callback_id:
+                        requests.post(
+                            answer_callback_url,
+                            json={
+                                "callback_query_id": callback_id,
+                                "text": "Reroute acknowledged! Stay safe.",
+                            },
+                            timeout=15,
+                        )
+
+                    log_telegram_event(
+                        "reroute_confirmed",
+                        "Driver confirmed reroute acknowledgement",
+                        {"chat_id": callback_chat_id}
+                    )
+                    continue
+
                 if callback_data == "notify_warehouse":
                     callback_message = callback.get("message", {})
                     callback_chat_id = callback_message.get("chat", {}).get("id", telegram_chat_id)
@@ -255,6 +306,12 @@ def poll_telegram_updates():
                         },
                         timeout=15,
                     )
+
+                    log_telegram_event(
+                        "warehouse_notified",
+                        f"Warehouse notified - Delay: {delay_hours}h, Cost Saved: ₹{labor_saved_inr:,}",
+                        {"delay_hours": delay_hours, "labor_saved": labor_saved_inr}
+                    )
                     continue
 
                 # Step 1: Accident callback -> acknowledge + request live location.
@@ -301,6 +358,12 @@ def poll_telegram_updates():
 
                     if callback_user_id is not None:
                         awaiting_location_users.add(callback_user_id)
+
+                    log_telegram_event(
+                        "accident_reported",
+                        "Driver reported accident - requesting GPS location",
+                        {"chat_id": callback_chat_id}
+                    )
                     continue
 
                 # Step 2: Listen for incoming Telegram messages containing location.
@@ -364,6 +427,12 @@ def poll_telegram_updates():
 
                     if sender_user_id is not None:
                         awaiting_location_users.discard(sender_user_id)
+
+                    log_telegram_event(
+                        "swarm_alert",
+                        f"Swarm alert triggered - GPS: {lat},{lon}",
+                        {"latitude": lat, "longitude": lon, "maps_url": maps_url}
+                    )
 
                     print("🚨 [Swarm Trigger] Driver GPS captured. scout_output.json written with geo location.")
 
