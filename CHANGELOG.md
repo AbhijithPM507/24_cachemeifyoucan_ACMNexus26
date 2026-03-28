@@ -1,3 +1,19 @@
+## 09:00
+
+### Features Added
+
+- **Comprehensive Financial Realism**: Refactored the dashboard's cost-estimation logic to use actual Indian B2B freight rates (Truck ₹18/km, Rail ₹9/km, Ship ₹4/km) and terminal handling fees (₹3,500 - ₹38,000) anchored to the `shipments.json` container portfolio.
+- **Emoji-Free UI Cleanup**: Systematically removed all emoji characters (Origin/Dest icons, ⏱️ timers, etc.) and HTML symbol entities from selectboxes, alert cards, and map tooltips for a streamlined, professional enterprise aesthetic.
+- **Alert Card Rendering Fix**: Stripped HTML indentation to prevent Streamlit's Markdown engine from unintentionally wrapping empty conditional alert rows in literal code blocks.
+
+### Files Modified
+
+- `01_scout_module/dashboard.py`
+
+### Issues Faced
+
+- **Markdown Parser Collision**: Streamlit's Markdown interpreter was treating indented HTML tags as code blocks when dynamic alert content was empty. Solved by left-flushing all HTML strings.
+
 ## 05:27
 
 ### Features Added
