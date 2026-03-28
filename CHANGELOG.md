@@ -317,6 +317,7 @@
 ## 22:55
 
 ### Features Added
+
 - Created `03_intel_module/capacity_matcher.py` - Dynamic Load Pooling with greedy vendor matching
 - Created `03_intel_module/capacity_market_ui.py` - Streamlit sidebar component for capacity market display
 - Created `shared_exchange/local_vendors.json` - Database of 10 vendors in Kerala/Karnataka logistics hubs
@@ -324,6 +325,7 @@
 - Updated `03_intel_module/intel_coordinator.py` - Integrated capacity sharing into intel workflow
 
 ### Files Modified
+
 - 03_intel_module/capacity_matcher.py (new)
 - 03_intel_module/capacity_market_ui.py (new)
 - 03_intel_module/intel_coordinator.py
@@ -331,6 +333,15 @@
 - shared_exchange/open_cargo_manifest.json (new)
 
 ### Issues Faced
+
+- Initial implementation placed logic in 04_manager_module which violated module isolation constraints
+- Resolved by consolidating all capacity sharing logic in 03_intel_module with shared_exchange for data persistence
+- Verified end-to-end flow generates valid manifest output with vendor matches
+
+## 22:56
+
+### Features Added
+
 - Initial implementation placed logic in 04_manager_module which violated module isolation constraints
 - Resolved by consolidating all capacity sharing logic in 03_intel_module with shared_exchange for data persistence
 - Verified end-to-end flow generates valid manifest output with vendor matches
@@ -341,6 +352,17 @@
 - Hardcoded the generated disruption targets (`Kochi`, `Mumbai`, `Chennai`, `Bangalore`, etc.) to guarantee 100% downstream shipment interception for consistent hackathon demo logic.
 
 ### Files Modified
+
+- `01_scout_module/chaos_trigger.py`
+
+### Issues Faced
+
+- Scout generated locations (e.g. `Thrissur`, `Perumbavoor`) were bypassing the Analyst Agent's exact string-matching logic, resulting in ₹0 risk pipelines. Resolved safely via node synchronization.
+
+## 23:04
+
+### Features Added
+
 - `01_scout_module/chaos_trigger.py`
 
 ### Issues Faced
@@ -354,6 +376,17 @@
 - Intercepted Python synchronous stalls by leveraging independent UI rendering states (`analyst_data` & `intel_data`) that dynamically output ₹ INR Risk Metrics and AI Oracle predictions to the presenter natively before the `04_manager_module` resolves.
 
 ### Files Modified
+
+- `01_scout_module/dashboard.py`
+
+### Issues Faced
+
+- The "Live Risk Dashboard" component presented blank empty states visually during intermediate downstream processes. Reprogrammed `dashboard.py` execution loops to actively poll and cleanly hydrate UI values sequentially as JSON endpoints are birthed in `shared_exchange`.
+
+## 23:25
+
+### Features Added
+
 - `01_scout_module/dashboard.py`
 
 ### Issues Faced
@@ -369,11 +402,17 @@
 - Implemented robust `sys.path` injection in the Dashboard to support cross-module agent imports natively from disparate sub-directories.
 
 ### Files Modified
+
 - `01_scout_module/dashboard.py`
 - `01_scout_module/scout_agent.py`
 - `CHANGELOG.md`
 
 ### Files Added
+
+- `04_manager_module/manager_agent.py`
+
+### Issues Faced
+
 - `04_manager_module/manager_agent.py`
 
 ### Issues Faced
@@ -404,6 +443,10 @@
 - Intel payload contract drift caused route parsing failures (`alternative_routes` as strings instead of objects), resolved with schema-flexible mapping in Manager.
 - ROI could be inaccurate when Intel omitted direct financial fields, resolved with Analyst fallback for `total_value_at_risk`.
 
+## 23:48
+
+### Features Added
+
 
 ## 23:48
 
@@ -414,6 +457,7 @@
 - Implemented global `gTTS` (Google Text-to-Speech) support for the executive briefing stage.
 
 ### Files Modified
+
 - `01_scout_module/dashboard.py`
 - `01_scout_module/scout_agent.py`
 - `02_analyst_module/analyst_agent.py`
@@ -422,6 +466,14 @@
 - `CHANGELOG.md`
 
 ### Issues Faced
+
+- **Groq Rate Limit Exceeded**: The 70B model reached daily token capacity mid-demonstration; resolved by switching to the faster, more flexible 8B-instant model.
+- **Path Resolution Errors**: Standard cross-module imports were failing during Streamlit execution; patched with absolute `sys.path` injections and module-level `os.path` normalization.
+
+## 00:00 (Final Release)
+
+### Features Added
+
 - **Groq Rate Limit Exceeded**: The 70B model reached daily token capacity mid-demonstration; resolved by switching to the faster, more flexible 8B-instant model.
 - **Path Resolution Errors**: Standard cross-module imports were failing during Streamlit execution; patched with absolute `sys.path` injections and module-level `os.path` normalization.
 
@@ -434,10 +486,12 @@
 - Enforced a zero-state baseline: Purged all legacy `shared_exchange` JSONs and audio artifacts to ensure the first project trigger is fresh.
 
 ### Files Modified
+
 - `01_scout_module/dashboard.py`
 - `CHANGELOG.md`
 
 ### Issues Faced
+
 - **UI Reset Stall**: The Reset button was initially failing to clear nested file system glob patterns for MP3s; patched with absolute `Path` normalization.
 
 ## 00:50
@@ -445,6 +499,12 @@
 ### Features Added
 
 - Engineered a **Premium Interactive Logistics Dashboard** overhaul:
+  - Implemented **Multi-Modal Vector Selection** (Ship, Truck, Rail, Air) with real-time UI switching.
+  - Integrated **High-Fidelity Path Simulation** for key Indian corridors (NH-66, Salem-Bangalore AH-43, South Coastal Spine).
+  - Developed a **Dynamic Telemetry Engine** using the Haversine formula to calculate accurate distances (km) and supply chain ETAs.
+  - Switched map rendering to a **No-Key-Required Cyberpunk Theme** with custom Purple Neon Overlays.
+  - Relocated the **Chaos Trigger System** to the Sidebar to maximize the main monitoring real estate.
+  - Stabilized the **decision-matching logic** to ensure transport recommendations persist in the UI after pipeline cleanup.
     - Implemented **Multi-Modal Vector Selection** (Ship, Truck, Rail, Air) with real-time UI switching.
     - Integrated **High-Fidelity Path Simulation** for key Indian corridors (NH-66, Salem-Bangalore AH-43, South Coastal Spine).
     - Developed a **Dynamic Telemetry Engine** using the Haversine formula to calculate accurate distances (km) and supply chain ETAs.
