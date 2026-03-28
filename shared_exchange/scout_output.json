@@ -1,8 +1,0 @@
-{
-  "event": "ROAD_CLOSURE",
-  "location": "Kochi",
-  "severity": "HIGH",
-  "details": "NH-66 blocked near Edapally junction due to flash flooding",
-  "affected_routes": ["NH-66"],
-  "timestamp": "2026-03-27T10:30:00"
-}

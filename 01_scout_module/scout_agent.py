@@ -37,7 +37,7 @@ def get_llm_response(prompt: str) -> str:
     }
     
     data = {
-        "model": "llama-3.3-70b-versatile",
+        "model": "llama-3.1-8b-instant",
         "messages": [
             {"role": "system", "content": "You are a perception scout agent for a supply chain system. Convert raw chaos into structured data. Output ONLY JSON exactly as requested in the prompt with no other text."},
             {"role": "user", "content": prompt}
@@ -49,14 +49,17 @@ def get_llm_response(prompt: str) -> str:
         with urllib.request.urlopen(req) as response:
             result = json.loads(response.read().decode("utf-8"))
             return result["choices"][0]["message"]["content"]
-    except urllib.error.URLError as e:
-        error_msg = f"LLM API Call Error: {e}"
-        if hasattr(e, 'read'):
-            try:
-                error_msg += f" Body: {e.read().decode('utf-8')}"
-            except:
-                pass
+    except urllib.error.HTTPError as e:
+        error_msg = f"LLM API HTTP Error: {e.code} - {e.reason}"
+        try:
+            error_msg += f" Body: {e.read().decode('utf-8')}"
+        except:
+            pass
         raise RuntimeError(error_msg)
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"LLM API Network Error: {e.reason}")
+    except Exception as e:
+        raise RuntimeError(f"Unexpected LLM Error: {str(e)}")
 
 def _get_fallback_output(signal: dict, reason: str) -> dict:
     return {
