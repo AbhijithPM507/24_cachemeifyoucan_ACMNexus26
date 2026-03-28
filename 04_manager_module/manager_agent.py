@@ -72,109 +72,70 @@ def send_telegram_alert(disruption_type, location, route_desc, malayalam_audio_p
     load_dotenv(dotenv_path=dotenv_path)
 
     TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-    TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+    primary_chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
-    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+    if not TELEGRAM_TOKEN or not primary_chat_id:
         print("⚠️ [Telegram] TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing in .env. Skipping alert safely.")
         return
 
-    # Message 1: Standard dispatch text with confirm button only.
+    # Proactively identify all users that have interacted with the bot to broadcast to everyone
+    all_subscriber_chats = {primary_chat_id}
+    if os.path.exists(TELEGRAM_EVENTS_PATH):
+        try:
+            with open(TELEGRAM_EVENTS_PATH, "r") as f:
+                event_log = json.load(f)
+                for ev in event_log:
+                    if "details" in ev and "chat_id" in ev["details"]:
+                        all_subscriber_chats.add(str(ev["details"]["chat_id"]))
+        except Exception as e:
+            print(f"⚠️ [Telegram] Could not Parse events for subscribers: {e}")
+
+    # Message Templates
     dispatch_text = (
         "🚨 *URGENT DRIVER DISPATCH* 🚨\n\n"
-        f"{disruption_type}\n"
-        f"*Location:* {location}\n"
+        f"Event: {disruption_type}\n"
+        f"📍 *Location:* {location}\n"
         f"🛣️ *Assigned Reroute:* {route_desc}\n\n"
         "Please confirm reroute acknowledgement immediately."
     )
-
-    send_message_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    inline_keyboard = {
-        "inline_keyboard": [
-            [
-                {"text": "✅ Confirm Reroute", "callback_data": "confirm"},
-                {"text": "👷 Notify Warehouse", "callback_data": "notify_warehouse"},
-            ]
-        ]
-    }
-
-    # Message 3: Dedicated emergency reporting message with accident trigger button.
     emergency_reporting_text = (
         "⚠️ EMERGENCY REPORTING ⚠️\n"
         "If you are in an accident or the road is completely blocked, click the "
-        "button below to instantly warn all other trucks in the network."
+        "button below to instantly warn all other trucks."
     )
-    emergency_keyboard = {
-        "inline_keyboard": [
-            [
-                {
-                    "text": "🚨 REPORT ACCIDENT (Trigger Swarm)",
-                    "callback_data": "accident",
-                }
-            ]
-        ]
-    }
+    inline_keyboard = {"inline_keyboard": [[{"text": "✅ Confirm Reroute", "callback_data": "confirm"},{"text": "👷 Notify Warehouse", "callback_data": "notify_warehouse"}]]}
+    emergency_keyboard = {"inline_keyboard": [[{"text": "🚨 REPORT ACCIDENT (Trigger Swarm)", "callback_data": "accident"}]]}
 
-    try:
-        # Message 1: Text + inline buttons.
-        resp1 = requests.post(
-            send_message_url,
-            json={
-                "chat_id": TELEGRAM_CHAT_ID,
-                "text": dispatch_text,
-                "parse_mode": "Markdown",
-                "reply_markup": inline_keyboard,
-            },
-            timeout=15,
-        )
-
-        # Message 2: Audio file upload immediately after text alert.
-        url_audio = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendAudio"
+    for chat_id in all_subscriber_chats:
+        print(f"📱 [Telegram] Dispatching payload to user/group: {chat_id}")
         try:
-            if not malayalam_audio_path:
-                resp2 = None
-            else:
-                with open(malayalam_audio_path, "rb") as audio_file:
-                    resp2 = requests.post(
-                        url_audio,
-                        data={"chat_id": TELEGRAM_CHAT_ID},
-                        files={"audio": audio_file},
-                        timeout=30,
-                    )
-        except FileNotFoundError:
-            resp2 = None
-            print(f"⚠️ [Telegram] Audio file not found yet: {malayalam_audio_path}")
-        except OSError as error:
-            resp2 = None
-            print(f"⚠️ [Telegram] Could not open audio file: {error}")
-        except TypeError:
-            resp2 = None
-            print(f"⚠️ [Telegram] Invalid audio path: {malayalam_audio_path}")
-
-        # Message 3: Dedicated accident trigger message.
-        resp3 = requests.post(
-            send_message_url,
-            json={
-                "chat_id": TELEGRAM_CHAT_ID,
-                "text": emergency_reporting_text,
-                "parse_mode": "Markdown",
-                "reply_markup": emergency_keyboard,
-            },
-            timeout=15,
-        )
-
-        if resp1.status_code == 200 and resp3.status_code == 200 and (
-            resp2 is None or resp2.status_code == 200
-        ):
-            print("📱 [Telegram] Driver dispatch sequence sent successfully.")
-        else:
-            print(
-                "❌ [Telegram] Dispatch issue: "
-                f"msg1={resp1.status_code}, "
-                f"audio={(resp2.status_code if resp2 is not None else 'skipped')}, "
-                f"msg3={resp3.status_code}"
+            # 1. Text Dispatch
+            resp1 = requests.post(
+                f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+                json={"chat_id": chat_id, "text": dispatch_text, "parse_mode": "Markdown", "reply_markup": inline_keyboard},
+                timeout=15
             )
-    except requests.RequestException as error:
-        print(f"⚠️ [Telegram] Network/API error: {error}")
+            
+            # 2. Audio if exists
+            if malayalam_audio_path and os.path.exists(malayalam_audio_path):
+                with open(malayalam_audio_path, "rb") as f:
+                    requests.post(
+                        f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendAudio",
+                        data={"chat_id": chat_id}, files={"audio": f}, timeout=30
+                    )
+
+            # 3. Emergency Reporting Trigger
+            requests.post(
+                f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+                json={"chat_id": chat_id, "text": emergency_reporting_text, "parse_mode": "Markdown", "reply_markup": emergency_keyboard},
+                timeout=15,
+            )
+            if resp1.status_code == 200:
+                print(f"✅ [Telegram] Alert sequence delivered to {chat_id}")
+            else:
+                print(f"❌ [Telegram] Delivery failed for {chat_id}: status={resp1.status_code}")
+        except Exception as e:
+            print(f"⚠️ [Telegram] Error sending to {chat_id}: {e}")
 
 
 def poll_telegram_updates():
@@ -519,6 +480,7 @@ def run_pipeline_once():
     wait_for_files()
     intel_data = read_json_with_retry(INTEL_INPUT_PATH)
     analyst_data = read_json_with_retry(ANALYST_INPUT_PATH)
+    scout_data = read_json_with_retry(SCOUT_OUTPUT_PATH) if os.path.exists(SCOUT_OUTPUT_PATH) else {}
 
     # 1. Math & ROI
     val_risk = float(analyst_data.get("total_value_at_risk", 50000))
@@ -582,9 +544,13 @@ def run_pipeline_once():
         new_eta_days=new_eta_days,
     )
 
+    # Get clean disruption info for Telegram
+    t_event = scout_data.get("disruption_type", scout_data.get("event", "Supply Chain Disruption"))
+    t_loc   = scout_data.get("location", "NH-66 Corridor")
+
     send_telegram_alert(
-        exec_en.strip(),
-        savings,
+        t_event,
+        t_loc,
         best_route['route_description'],
         MP3_MALAYALAM,
     )

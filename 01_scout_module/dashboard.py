@@ -816,7 +816,9 @@ elif st.session_state.pipeline_stage == 4:
 elif st.session_state.pipeline_stage == 5:
     # Stage 5: Final Manager Decision
     from manager_agent import run_pipeline_once
-    run_pipeline_once()
+    with st.spinner("Dispatching Telegram Alerts..."):
+        run_pipeline_once()
+    st.toast("✅ Telegram Alert Dispatched to Logistics Fleet", icon="📱")
     st.session_state.pipeline_stage = 6  # All done
     st.rerun()
 
@@ -832,8 +834,12 @@ if st.sidebar.button("Master Reset", use_container_width=True):
 st.sidebar.markdown("---")
 st.sidebar.subheader("Telegram Integration")
 telegram_status_placeholder = st.sidebar.empty()
+import importlib
 try:
+    import manager_agent
+    importlib.reload(manager_agent)
     from manager_agent import send_telegram_alert, poll_telegram_updates, get_telegram_events
+
     import os
     import threading
     from dotenv import load_dotenv
