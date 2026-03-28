@@ -11,6 +11,9 @@ from dotenv import load_dotenv
 # Load secret keys from .env file
 load_dotenv()
 
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+WAREHOUSE_CHAT_ID = os.getenv("WAREHOUSE_CHAT_ID")
+
 # Initialize Groq client
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
@@ -23,6 +26,7 @@ ANALYST_INPUT_PATH = os.path.join(SHARED_DIR, "analyst_output.json")
 FINAL_OUTPUT_PATH = os.path.join(SHARED_DIR, "final_results.json")
 AGV_OUTPUT_PATH = os.path.join(SHARED_DIR, "agv_payload.json")
 SCOUT_OUTPUT_PATH = os.path.join(SHARED_DIR, "scout_output.json")
+WAREHOUSE_SCHEDULE_PATH = os.path.join(SHARED_DIR, "warehouse_schedule.json")
 MP3_ENGLISH = os.path.join(MANAGER_DIR, "alert_english.mp3")
 MP3_MALAYALAM = os.path.join(MANAGER_DIR, "alert_malayalam.mp3")
 
@@ -58,6 +62,7 @@ def send_telegram_alert(disruption_type, location, route_desc, malayalam_audio_p
         "inline_keyboard": [
             [
                 {"text": "✅ Confirm Reroute", "callback_data": "confirm"},
+                {"text": "👷 Notify Warehouse", "callback_data": "notify_warehouse"},
             ]
         ]
     }
@@ -165,9 +170,12 @@ def poll_telegram_updates():
 
     next_offset = 0
     awaiting_location_users = set()
+    stop_poller = False
     print("📡 [Telegram Poller] Listening for driver callbacks...")
 
     while True:
+        if stop_poller:
+            break
         try:
             response = requests.get(
                 get_updates_url,
@@ -185,6 +193,63 @@ def poll_telegram_updates():
                 callback = update.get("callback_query", {})
                 callback_data = str(callback.get("data", "")).lower()
                 callback_id = callback.get("id")
+
+                if callback_data == "notify_warehouse":
+                    callback_message = callback.get("message", {})
+                    callback_chat_id = callback_message.get("chat", {}).get("id", telegram_chat_id)
+
+                    # Stop Telegram button spinner immediately.
+                    if callback_id:
+                        requests.post(
+                            answer_callback_url,
+                            json={
+                                "callback_query_id": callback_id,
+                                "text": "Notifying warehouse now...",
+                            },
+                            timeout=15,
+                        )
+
+                    warehouse_chat_id = os.getenv("WAREHOUSE_CHAT_ID")
+                    if not warehouse_chat_id:
+                        print("⚠️ [Telegram Poller] WAREHOUSE_CHAT_ID missing. Cannot notify warehouse.")
+                        stop_poller = True
+                        break
+
+                    # Demo delay math.
+                    delay_hours = 4
+                    labor_saved_inr = delay_hours * 10 * 150
+                    new_arrival_time = (
+                        datetime.datetime.now() + datetime.timedelta(hours=delay_hours)
+                    ).strftime("%d %b %Y, %I:%M %p")
+
+                    # Notify warehouse manager chat.
+                    warehouse_message = (
+                        "🏭 WAREHOUSE DOCK ALERT 🏭\n\n"
+                        f"⚠️ Driver Reported Delay: The inbound truck has been delayed by {delay_hours} hours.\n"
+                        f"🕒 New ETA: {new_arrival_time}\n\n"
+                        "✅ Action Required: Reallocate Dock crew.\n"
+                        f"💰 Idle Labor Cost Prevented: ₹{labor_saved_inr:,}"
+                    )
+                    requests.post(
+                        send_message_url,
+                        json={
+                            "chat_id": warehouse_chat_id,
+                            "text": warehouse_message,
+                            "parse_mode": "Markdown",
+                        },
+                        timeout=15,
+                    )
+
+                    # Confirm back to driver.
+                    requests.post(
+                        send_message_url,
+                        json={
+                            "chat_id": callback_chat_id,
+                            "text": "✅ Warehouse successfully notified. They are reallocating the dock crew.",
+                        },
+                        timeout=15,
+                    )
+                    continue
 
                 # Step 1: Accident callback -> acknowledge + request live location.
                 if callback_data == "accident":
@@ -320,6 +385,29 @@ def generate_agv_payload(route_desc):
     print(f"🤖 [AGV Robot] Handshake complete! Bay {payload['bay_number']} reserved.")
     return payload
 
+
+def update_warehouse_wms(shipment_id: str, delay_hours: int, new_eta_days: int):
+    """Notify warehouse operations about inbound delay and dock/labor adjustments."""
+    idle_labor_saved_inr = delay_hours * 10 * 150
+    new_arrival_dt = datetime.datetime.now() + datetime.timedelta(
+        days=new_eta_days,
+        hours=delay_hours,
+    )
+    new_arrival_time = new_arrival_dt.strftime("%d %b %Y, %I:%M %p")
+
+    warehouse_payload = {
+        "shipment_id": shipment_id,
+        "agv_status": "Standby",
+        "dock_status": "Reallocated",
+        "labor_saved_inr": idle_labor_saved_inr,
+        "new_arrival_time": new_arrival_time,
+    }
+
+    os.makedirs(SHARED_DIR, exist_ok=True)
+    with open(WAREHOUSE_SCHEDULE_PATH, "w", encoding="utf-8") as warehouse_file:
+        json.dump(warehouse_payload, warehouse_file, indent=2)
+    print("🏭 [Warehouse WMS] warehouse_schedule.json updated for dashboard.")
+
 # ==========================================
 # FEATURE 3: BLEED RATE CALCULATOR
 # ==========================================
@@ -386,6 +474,15 @@ def run_pipeline_once():
 
     # 4. Trigger Advanced Hardware/Mobile Features
     agv_payload = generate_agv_payload(best_route['route_description'])
+
+    delay_hours = int(best_route.get("delay_hours", 6))
+    new_eta_days = int(best_route.get("new_eta_days", 1))
+    update_warehouse_wms(
+        shipment_id=agv_payload["shipment_id"],
+        delay_hours=delay_hours,
+        new_eta_days=new_eta_days,
+    )
+
     send_telegram_alert(
         exec_en.strip(),
         savings,
