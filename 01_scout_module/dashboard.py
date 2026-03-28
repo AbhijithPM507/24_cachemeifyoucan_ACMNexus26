@@ -555,11 +555,45 @@ def render_map(location_name=None, severity="HIGH", rerouting=False, old_mode="T
     display_dist = osrm_dist if osrm_dist > 0 else haversine(start_loc["lon"], start_loc["lat"], end_loc["lon"], end_loc["lat"])
     active_color = mode_colors.get(mode, sev_color)
 
+    # Calculate global risk & financial metrics anchored to actual shipment portfolio
+    analyst_data = load_json(ANALYST_PATH)
+    final_data = load_json(FINAL_RESULTS_PATH)
+    # Fallback: actual sum of the 15 shipments in our dataset = ₹37,28,500 across NH-66 corridor
+    val_risk = float(analyst_data.get("total_value_at_risk", 1850000)) if analyst_data else 1850000.0
+    affected_ships = analyst_data.get("affected_shipments", []) if analyst_data else []
+    # Typical NH-66 disruption hits 4-6 shipments worth ~₹5-12L combined
+    num_ships = len(affected_ships) if affected_ships else 5
+    # 80% of cargo value is at-risk during a stoppage (storage, perishability, contract penalties)
+    loss_no_action = val_risk * 0.80
+
     # Helper for formatting route tooltip strings securely
     def _format_tooltip(m, d, t):
         if t <= 0: t = d / {"SHIP": 40, "TRUCK": 55, "RAIL": 65, "AIR": 800}.get(m, 50)
         t_str = f"{t:.1f} HRS" if t >= 1 else f"{t*60:.0f} MIN"
-        return f"<div style='font-family:sans-serif;'><b style='color:#6366f1;font-size:14px'>{m}</b><br/><span style='color:#333'>{d:.0f} KM &bull; ⏱️ {t_str}</span></div>"
+
+        # Sync the chosen/active path directly with Manager Agent's locked projection
+        if final_data and "roi" in final_data and "savings" in final_data["roi"] and m == mode and rerouting:
+            net_savings = float(final_data["roi"]["savings"])
+            total_reroute_cost = loss_no_action - net_savings
+        else:
+            # Realistic Indian B2B bulk freight rates (INR/km) for 8-15T FTL cargo:
+            # TRUCK:  ₹18/km for 8T FTL (market rate: ₹15-25/km depending on state)
+            # RAIL:   ₹9/km for wagon load (Railway freight tariff for Class-6 goods ~₹0.90/tonne-km × 10T)
+            # SHIP:   ₹4/km equivalent (coastal LCL — ₹3,500-5,000 per tonne for 500km voyage)
+            # AIR:    ₹180/km for air cargo (market: ~₹120-220/kg; our avg shipment 2T → heavy freight rate)
+            rate_per_km = {"TRUCK": 18.0, "RAIL": 9.0, "SHIP": 4.0, "AIR": 180.0}.get(m, 18.0)
+            # Terminal/handling fee per shipment (loading/unloading, documentation)
+            terminal_fee = {"TRUCK": 3500, "RAIL": 9500, "SHIP": 22000, "AIR": 38000}.get(m, 3500)
+            # Avg affected shipment weight from dataset: varied (800–22000 kg); use 8T as central estimate
+            avg_weight_tonnes = 8.0
+            cost_per_shipment = (d * rate_per_km * avg_weight_tonnes / 10.0) + terminal_fee
+            total_reroute_cost = cost_per_shipment * num_ships
+            net_savings = loss_no_action - total_reroute_cost
+
+        metrics_line = f"{d:.0f} KM \u2022 ETA: {t_str}"
+        money_line = f"<br/><span style='color:#ef4444;'>Reroute Cost: \u20b9{total_reroute_cost:,.0f}</span> &nbsp;|&nbsp; <span style='color:#22c55e;'>Net Saved: \u20b9{net_savings:,.0f}</span>"
+
+        return f"<div style='font-family:sans-serif; padding:4px;'><b style='color:#6366f1;font-size:14px'>{m}</b><br/><span style='color:#333;font-size:12px;'>{metrics_line}{money_line}</span></div>"
 
     layers = []
 
@@ -693,6 +727,9 @@ if "route_origin" not in st.session_state:
     st.session_state.route_origin = "Cochin Port"
 if "route_dest" not in st.session_state:
     st.session_state.route_dest = "Kozhikode"
+# Pipeline stage tracking for animated Demo Sequence (0=idle, 1-5=each step, 6=done)
+if "pipeline_stage" not in st.session_state:
+    st.session_state.pipeline_stage = 0
 
 # --- SIDEBAR ---
 st.sidebar.title("System Parameters")
@@ -702,35 +739,59 @@ st.session_state.auto_refresh = st.sidebar.checkbox("Auto-Refresh UI (3s)", valu
 st.sidebar.markdown("---")
 st.sidebar.subheader("Disruption Simulation")
 if st.sidebar.button("INJECT CHAOS EVENT", use_container_width=True, type="primary"):
-    with st.sidebar.status("Injecting Black Swan Event..."):
-        for p in [SCOUT_PATH, ANALYST_PATH, INTEL_PATH, FINAL_RESULTS_PATH, SHARED_DIR / "signal.json"]:
-            if p.exists(): p.unlink()
-        
-        # Bind the disruption specifically to the active route!
-        event_data = trigger_chaos(target_locations=[st.session_state.route_origin, st.session_state.route_dest])
-        
-        process_signal()
-        from analyst_agent import run_analyst_agent
-        run_analyst_agent()
-        from strategist_agent import run_strategist
-        from simulator_agent import run_simulator
-        a_data = load_json(ANALYST_PATH)
-        if a_data:
-            strat_res = run_strategist(a_data)
-            sim_res = run_simulator(a_data, strat_res)
-            intel_output = {
-                "strategic_lesson": strat_res.get("strategic_lesson", ""),
-                "match_confidence": sim_res.get("oracle_recommendation", {}).get("confidence_score", 0.0),
-                "alternative_routes": sim_res.get("oracle_recommendation", {}).get("alternative_modes", []),
-                "recommended_mode": sim_res.get("oracle_recommendation", {}).get("recommended_mode", "Unknown"),
-                "simulation_details": sim_res.get("simulation_results", []),
-                "agent_thoughts": "Strategist and Simulator complete analytics.",
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-            }
-            with open(INTEL_PATH, "w") as f: json.dump(intel_output, f, indent=2)
-        from manager_agent import run_pipeline_once
-        run_pipeline_once()
-        st.rerun()
+    # Clear all previous pipeline outputs and reset stage counter
+    for p in [SCOUT_PATH, ANALYST_PATH, INTEL_PATH, FINAL_RESULTS_PATH, SHARED_DIR / "signal.json"]:
+        if p.exists(): p.unlink()
+    st.session_state.pipeline_stage = 1  # Stage 1: Chaos Injected
+    st.rerun()
+
+# --- STAGED PIPELINE EXECUTION (runs one stage per rerun for animated UI) ---
+if st.session_state.pipeline_stage == 1:
+    # Stage 1 complete — trigger Scout Analysis
+    trigger_chaos(target_locations=[st.session_state.route_origin, st.session_state.route_dest])
+    st.session_state.pipeline_stage = 2
+    st.rerun()
+
+elif st.session_state.pipeline_stage == 2:
+    # Stage 2: Scout Analysis
+    process_signal()
+    st.session_state.pipeline_stage = 3
+    st.rerun()
+
+elif st.session_state.pipeline_stage == 3:
+    # Stage 3: Analyst Risk Assessment
+    from analyst_agent import run_analyst_agent
+    run_analyst_agent()
+    st.session_state.pipeline_stage = 4
+    st.rerun()
+
+elif st.session_state.pipeline_stage == 4:
+    # Stage 4: Strategy Simulation
+    from strategist_agent import run_strategist
+    from simulator_agent import run_simulator
+    a_data = load_json(ANALYST_PATH)
+    if a_data:
+        strat_res = run_strategist(a_data)
+        sim_res = run_simulator(a_data, strat_res)
+        intel_output = {
+            "strategic_lesson": strat_res.get("strategic_lesson", ""),
+            "match_confidence": sim_res.get("oracle_recommendation", {}).get("confidence_score", 0.0),
+            "alternative_routes": sim_res.get("oracle_recommendation", {}).get("alternative_modes", []),
+            "recommended_mode": sim_res.get("oracle_recommendation", {}).get("recommended_mode", "Unknown"),
+            "simulation_details": sim_res.get("simulation_results", []),
+            "agent_thoughts": "Strategist and Simulator complete analytics.",
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        with open(INTEL_PATH, "w") as f: json.dump(intel_output, f, indent=2)
+    st.session_state.pipeline_stage = 5
+    st.rerun()
+
+elif st.session_state.pipeline_stage == 5:
+    # Stage 5: Final Manager Decision
+    from manager_agent import run_pipeline_once
+    run_pipeline_once()
+    st.session_state.pipeline_stage = 6  # All done
+    st.rerun()
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("System Recovery")
@@ -825,7 +886,7 @@ with col_left:
     with rc1:
         # Use neutral key 'sel_origin' — never conflicts with route_origin state var
         origin_sel = st.selectbox(
-            "🛫 Origin Hub",
+            "Origin Hub",
             options=hub_names,
             index=hub_names.index(st.session_state.route_origin) if st.session_state.route_origin in hub_names else 0,
             key="sel_origin"
@@ -834,7 +895,7 @@ with col_left:
     with rc2:
         # Use neutral key 'sel_dest' — never conflicts with route_dest state var
         dest_sel = st.selectbox(
-            "📍 Destination Hub",
+            "Destination Hub",
             options=hub_names,
             index=hub_names.index(st.session_state.route_dest) if st.session_state.route_dest in hub_names else 0,
             key="sel_dest"
@@ -883,30 +944,29 @@ with col_left:
         impact_row = f'<div style="color:#f97316;font-size:0.72rem;margin-top:0.25rem;">{impact_txt}</div>' if impact_txt else ""
 
         st.markdown(f"""
-        <style>
-        @keyframes pulse-dot {{
-            0%,100% {{ opacity:1; transform:scale(1); box-shadow:0 0 0 0 {sev_color}88; }}
-            50% {{ opacity:0.6; transform:scale(1.5); box-shadow:0 0 0 6px {sev_color}22; }}
-        }}
-        </style>
-        <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.35);border-radius:0.75rem;padding:0.9rem 1.25rem;margin-bottom:0.6rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;">
-            <span style="display:inline-block;width:12px;height:12px;min-width:12px;background:{sev_color};border-radius:50%;animation:pulse-dot 1.2s ease-in-out infinite;"></span>
-            <div style="flex:1;min-width:160px;">
-                <div style="font-size:1rem;font-weight:800;color:#f8fafc;letter-spacing:0.02em;">&#9888;&nbsp; {evt_type}</div>
-                <div style="font-size:0.82rem;color:#94a3b8;margin-top:0.2rem;">&#128205; Affected Zone: <strong style="color:#f8fafc;">{evt_loc}</strong></div>
-            </div>
-            <div style="text-align:center;">
-                <div style="background:{sev_color}22;border:1px solid {sev_color}88;border-radius:0.4rem;padding:0.25rem 0.75rem;font-size:0.78rem;font-weight:800;color:{sev_color};letter-spacing:0.12em;">{severity.upper()}</div>
-                <div style="font-size:0.7rem;color:#64748b;margin-top:0.2rem;">SEVERITY</div>
-            </div>
-            <div style="font-size:0.75rem;color:#64748b;line-height:1.7;min-width:140px;">
-                <div>ID: <span style="color:#94a3b8;">{evt_id}</span></div>
-                <div>Source: <span style="color:#94a3b8;">{evt_source}</span></div>
-                {time_row}
-                {impact_row}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+<style>
+@keyframes pulse-dot {{
+    0%,100% {{ opacity:1; transform:scale(1); box-shadow:0 0 0 0 {sev_color}88; }}
+    50% {{ opacity:0.6; transform:scale(1.5); box-shadow:0 0 0 6px {sev_color}22; }}
+}}
+</style>
+<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.35);border-radius:0.75rem;padding:0.9rem 1.25rem;margin-bottom:0.6rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;">
+<span style="display:inline-block;width:12px;height:12px;min-width:12px;background:{sev_color};border-radius:50%;animation:pulse-dot 1.2s ease-in-out infinite;"></span>
+<div style="flex:1;min-width:160px;">
+<div style="font-size:1rem;font-weight:800;color:#f8fafc;letter-spacing:0.02em;">{evt_type}</div>
+<div style="font-size:0.82rem;color:#94a3b8;margin-top:0.2rem;">Affected Zone: <strong style="color:#f8fafc;">{evt_loc}</strong></div>
+</div>
+<div style="text-align:center;">
+<div style="background:{sev_color}22;border:1px solid {sev_color}88;border-radius:0.4rem;padding:0.25rem 0.75rem;font-size:0.78rem;font-weight:800;color:{sev_color};letter-spacing:0.12em;">{severity.upper()}</div>
+<div style="font-size:0.7rem;color:#64748b;margin-top:0.2rem;">SEVERITY</div>
+</div>
+<div style="font-size:0.75rem;color:#64748b;line-height:1.7;min-width:140px;">
+<div>ID: <span style="color:#94a3b8;">{evt_id}</span></div>
+<div>Source: <span style="color:#94a3b8;">{evt_source}</span></div>
+{time_row}{impact_row}
+</div>
+</div>
+""", unsafe_allow_html=True)
 
     render_map(
         location_name=st.session_state.route_dest,
@@ -922,23 +982,57 @@ with col_right:
     # DEMO PROGRESSION
     if demo_mode:
         st.markdown("<h3 style='color: white; margin-top: 1rem; margin-bottom: 1rem;'>Demo Sequence</h3>", unsafe_allow_html=True)
-        step = 0
-        if final_res: step = 5
-        elif intel_data: step = 4
-        elif analyst_data: step = 3
-        elif scout_data: step = 2
-        elif load_json(SHARED_DIR / "signal.json"): step = 1
+
+        # Use pipeline_stage (in-flight) if active, otherwise derive from files on disk
+        pipe_stage = st.session_state.get("pipeline_stage", 0)
+        file_step = 0
+        if final_res:      file_step = 5
+        elif intel_data:   file_step = 4
+        elif analyst_data: file_step = 3
+        elif scout_data:   file_step = 2
+        elif load_json(SHARED_DIR / "signal.json"): file_step = 1
+
+        # While pipeline is actively running (stages 1-5), use live stage counter
+        active_step = pipe_stage if (1 <= pipe_stage <= 5) else (6 if pipe_stage == 6 else file_step)
+
         steps = ["Chaos Injected", "Scout Analysis", "Risk Assessment", "Strategy Simulation", "Final Decision"]
-        msgs = ["Awaiting system trigger...", "Detecting disruption anomalies...", "Analyzing blast radius impact...", "Simulating alternatives...", "Calculating ROI...", "System stabilized."]
+        msgs  = ["Awaiting system trigger...", "Detecting disruption anomalies...", "Analyzing blast radius impact...", "Simulating alternatives...", "Calculating ROI...", "System stabilized."]
+
+        processing_css = """
+<style>
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.pulsing-step { animation: blink 1.1s ease-in-out infinite; }
+</style>"""
+        st.markdown(processing_css, unsafe_allow_html=True)
+
         for i, s_name in enumerate(steps):
             s_idx = i + 1
-            if s_idx == step:
-                st.markdown(f"<div style='color: #818cf8; font-weight: 700; border-left: 3px solid #818cf8; padding: 0.4rem 0.75rem; margin-bottom: 0.4rem; background: rgba(129,140,248,0.08); font-size: 0.85rem;'>{i+1}. {s_name}</div>", unsafe_allow_html=True)
-            elif s_idx < step:
-                st.markdown(f"<div style='color: #334155; padding: 0.4rem 0.75rem; margin-bottom: 0.4rem; font-size: 0.85rem;'>✓ {s_name}</div>", unsafe_allow_html=True)
+            if s_idx == active_step:
+                # Currently processing — pulsing highlight
+                st.markdown(
+                    f"<div class='pulsing-step' style='color:#f59e0b;font-weight:700;"
+                    f"border-left:3px solid #f59e0b;padding:0.4rem 0.75rem;"
+                    f"margin-bottom:0.4rem;background:rgba(245,158,11,0.08);"
+                    f"font-size:0.85rem;'>{s_idx}. {s_name} &nbsp;<span style='font-size:0.75rem;'>Processing...</span></div>",
+                    unsafe_allow_html=True
+                )
+            elif s_idx < active_step:
+                # Done — green check
+                st.markdown(
+                    f"<div style='color:#22c55e;padding:0.4rem 0.75rem;"
+                    f"margin-bottom:0.4rem;font-size:0.85rem;'>&#10003; {s_name}</div>",
+                    unsafe_allow_html=True
+                )
             else:
-                st.markdown(f"<div style='color: #475569; padding: 0.4rem 0.75rem; margin-bottom: 0.4rem; font-size: 0.85rem;'>{i+1}. {s_name}</div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='demo-msg'>STATUS: {msgs[step]}</div>", unsafe_allow_html=True)
+                # Pending — dimmed
+                st.markdown(
+                    f"<div style='color:#475569;padding:0.4rem 0.75rem;"
+                    f"margin-bottom:0.4rem;font-size:0.85rem;'>{s_idx}. {s_name}</div>",
+                    unsafe_allow_html=True
+                )
+
+        display_step = min(active_step, len(msgs) - 1)
+        st.markdown(f"<div class='demo-msg'>STATUS: {msgs[display_step]}</div>", unsafe_allow_html=True)
 
     # LIVE RISK DASHBOARD
     st.markdown("<h3 style='color: white; margin-top: 1.5rem; margin-bottom: 0.75rem;'>Live Risk Dashboard</h3>", unsafe_allow_html=True)

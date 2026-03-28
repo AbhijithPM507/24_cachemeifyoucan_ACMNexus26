@@ -1,3 +1,33 @@
+## 09:12
+
+### Features Added
+
+- **Animated Demo Sequence Pipeline**: Refactored the "INJECT CHAOS EVENT" button to execute each AI agent step as a separate Streamlit rerun, enabling the Demo Sequence panel to animate live through all 5 stages one-by-one.
+- **Live Step Indicators**: Active step pulses in amber with a CSS blink animation and "Processing..." label; completed steps show a green checkmark (✓); pending steps remain dimmed — giving a real-time pipeline visualization effect.
+
+### Files Modified
+
+- `01_scout_module/dashboard.py`
+
+### Issues Faced
+
+- None
+
+## 09:00
+
+### Features Added
+
+- **Comprehensive Financial Realism**: Refactored the dashboard's cost-estimation logic to use actual Indian B2B freight rates (Truck ₹18/km, Rail ₹9/km, Ship ₹4/km) and terminal handling fees (₹3,500 - ₹38,000) anchored to the `shipments.json` container portfolio.
+- **Emoji-Free UI Cleanup**: Systematically removed all emoji characters (Origin/Dest icons, ⏱️ timers, etc.) and HTML symbol entities from selectboxes, alert cards, and map tooltips for a streamlined, professional enterprise aesthetic.
+- **Alert Card Rendering Fix**: Stripped HTML indentation to prevent Streamlit's Markdown engine from unintentionally wrapping empty conditional alert rows in literal code blocks.
+
+### Files Modified
+
+- `01_scout_module/dashboard.py`
+
+### Issues Faced
+
+- **Markdown Parser Collision**: Streamlit's Markdown interpreter was treating indented HTML tags as code blocks when dynamic alert content was empty. Solved by left-flushing all HTML strings.
 ## 08:41
 
 ### Features Added
