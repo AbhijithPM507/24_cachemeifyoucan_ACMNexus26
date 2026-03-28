@@ -1,3 +1,18 @@
+## 09:12
+
+### Features Added
+
+- **Animated Demo Sequence Pipeline**: Refactored the "INJECT CHAOS EVENT" button to execute each AI agent step as a separate Streamlit rerun, enabling the Demo Sequence panel to animate live through all 5 stages one-by-one.
+- **Live Step Indicators**: Active step pulses in amber with a CSS blink animation and "Processing..." label; completed steps show a green checkmark (✓); pending steps remain dimmed — giving a real-time pipeline visualization effect.
+
+### Files Modified
+
+- `01_scout_module/dashboard.py`
+
+### Issues Faced
+
+- None
+
 ## 09:00
 
 ### Features Added

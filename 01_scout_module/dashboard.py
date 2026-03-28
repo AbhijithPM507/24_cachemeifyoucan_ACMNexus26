@@ -727,6 +727,9 @@ if "route_origin" not in st.session_state:
     st.session_state.route_origin = "Cochin Port"
 if "route_dest" not in st.session_state:
     st.session_state.route_dest = "Kozhikode"
+# Pipeline stage tracking for animated Demo Sequence (0=idle, 1-5=each step, 6=done)
+if "pipeline_stage" not in st.session_state:
+    st.session_state.pipeline_stage = 0
 
 # --- SIDEBAR ---
 st.sidebar.title("System Parameters")
@@ -736,35 +739,59 @@ st.session_state.auto_refresh = st.sidebar.checkbox("Auto-Refresh UI (3s)", valu
 st.sidebar.markdown("---")
 st.sidebar.subheader("Disruption Simulation")
 if st.sidebar.button("INJECT CHAOS EVENT", use_container_width=True, type="primary"):
-    with st.sidebar.status("Injecting Black Swan Event..."):
-        for p in [SCOUT_PATH, ANALYST_PATH, INTEL_PATH, FINAL_RESULTS_PATH, SHARED_DIR / "signal.json"]:
-            if p.exists(): p.unlink()
-        
-        # Bind the disruption specifically to the active route!
-        event_data = trigger_chaos(target_locations=[st.session_state.route_origin, st.session_state.route_dest])
-        
-        process_signal()
-        from analyst_agent import run_analyst_agent
-        run_analyst_agent()
-        from strategist_agent import run_strategist
-        from simulator_agent import run_simulator
-        a_data = load_json(ANALYST_PATH)
-        if a_data:
-            strat_res = run_strategist(a_data)
-            sim_res = run_simulator(a_data, strat_res)
-            intel_output = {
-                "strategic_lesson": strat_res.get("strategic_lesson", ""),
-                "match_confidence": sim_res.get("oracle_recommendation", {}).get("confidence_score", 0.0),
-                "alternative_routes": sim_res.get("oracle_recommendation", {}).get("alternative_modes", []),
-                "recommended_mode": sim_res.get("oracle_recommendation", {}).get("recommended_mode", "Unknown"),
-                "simulation_details": sim_res.get("simulation_results", []),
-                "agent_thoughts": "Strategist and Simulator complete analytics.",
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-            }
-            with open(INTEL_PATH, "w") as f: json.dump(intel_output, f, indent=2)
-        from manager_agent import run_pipeline_once
-        run_pipeline_once()
-        st.rerun()
+    # Clear all previous pipeline outputs and reset stage counter
+    for p in [SCOUT_PATH, ANALYST_PATH, INTEL_PATH, FINAL_RESULTS_PATH, SHARED_DIR / "signal.json"]:
+        if p.exists(): p.unlink()
+    st.session_state.pipeline_stage = 1  # Stage 1: Chaos Injected
+    st.rerun()
+
+# --- STAGED PIPELINE EXECUTION (runs one stage per rerun for animated UI) ---
+if st.session_state.pipeline_stage == 1:
+    # Stage 1 complete — trigger Scout Analysis
+    trigger_chaos(target_locations=[st.session_state.route_origin, st.session_state.route_dest])
+    st.session_state.pipeline_stage = 2
+    st.rerun()
+
+elif st.session_state.pipeline_stage == 2:
+    # Stage 2: Scout Analysis
+    process_signal()
+    st.session_state.pipeline_stage = 3
+    st.rerun()
+
+elif st.session_state.pipeline_stage == 3:
+    # Stage 3: Analyst Risk Assessment
+    from analyst_agent import run_analyst_agent
+    run_analyst_agent()
+    st.session_state.pipeline_stage = 4
+    st.rerun()
+
+elif st.session_state.pipeline_stage == 4:
+    # Stage 4: Strategy Simulation
+    from strategist_agent import run_strategist
+    from simulator_agent import run_simulator
+    a_data = load_json(ANALYST_PATH)
+    if a_data:
+        strat_res = run_strategist(a_data)
+        sim_res = run_simulator(a_data, strat_res)
+        intel_output = {
+            "strategic_lesson": strat_res.get("strategic_lesson", ""),
+            "match_confidence": sim_res.get("oracle_recommendation", {}).get("confidence_score", 0.0),
+            "alternative_routes": sim_res.get("oracle_recommendation", {}).get("alternative_modes", []),
+            "recommended_mode": sim_res.get("oracle_recommendation", {}).get("recommended_mode", "Unknown"),
+            "simulation_details": sim_res.get("simulation_results", []),
+            "agent_thoughts": "Strategist and Simulator complete analytics.",
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        with open(INTEL_PATH, "w") as f: json.dump(intel_output, f, indent=2)
+    st.session_state.pipeline_stage = 5
+    st.rerun()
+
+elif st.session_state.pipeline_stage == 5:
+    # Stage 5: Final Manager Decision
+    from manager_agent import run_pipeline_once
+    run_pipeline_once()
+    st.session_state.pipeline_stage = 6  # All done
+    st.rerun()
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("System Recovery")
@@ -933,23 +960,57 @@ with col_right:
     # DEMO PROGRESSION
     if demo_mode:
         st.markdown("<h3 style='color: white; margin-top: 1rem; margin-bottom: 1rem;'>Demo Sequence</h3>", unsafe_allow_html=True)
-        step = 0
-        if final_res: step = 5
-        elif intel_data: step = 4
-        elif analyst_data: step = 3
-        elif scout_data: step = 2
-        elif load_json(SHARED_DIR / "signal.json"): step = 1
+
+        # Use pipeline_stage (in-flight) if active, otherwise derive from files on disk
+        pipe_stage = st.session_state.get("pipeline_stage", 0)
+        file_step = 0
+        if final_res:      file_step = 5
+        elif intel_data:   file_step = 4
+        elif analyst_data: file_step = 3
+        elif scout_data:   file_step = 2
+        elif load_json(SHARED_DIR / "signal.json"): file_step = 1
+
+        # While pipeline is actively running (stages 1-5), use live stage counter
+        active_step = pipe_stage if (1 <= pipe_stage <= 5) else (6 if pipe_stage == 6 else file_step)
+
         steps = ["Chaos Injected", "Scout Analysis", "Risk Assessment", "Strategy Simulation", "Final Decision"]
-        msgs = ["Awaiting system trigger...", "Detecting disruption anomalies...", "Analyzing blast radius impact...", "Simulating alternatives...", "Calculating ROI...", "System stabilized."]
+        msgs  = ["Awaiting system trigger...", "Detecting disruption anomalies...", "Analyzing blast radius impact...", "Simulating alternatives...", "Calculating ROI...", "System stabilized."]
+
+        processing_css = """
+<style>
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.pulsing-step { animation: blink 1.1s ease-in-out infinite; }
+</style>"""
+        st.markdown(processing_css, unsafe_allow_html=True)
+
         for i, s_name in enumerate(steps):
             s_idx = i + 1
-            if s_idx == step:
-                st.markdown(f"<div style='color: #818cf8; font-weight: 700; border-left: 3px solid #818cf8; padding: 0.4rem 0.75rem; margin-bottom: 0.4rem; background: rgba(129,140,248,0.08); font-size: 0.85rem;'>{i+1}. {s_name}</div>", unsafe_allow_html=True)
-            elif s_idx < step:
-                st.markdown(f"<div style='color: #334155; padding: 0.4rem 0.75rem; margin-bottom: 0.4rem; font-size: 0.85rem;'>[done] {s_name}</div>", unsafe_allow_html=True)
+            if s_idx == active_step:
+                # Currently processing — pulsing highlight
+                st.markdown(
+                    f"<div class='pulsing-step' style='color:#f59e0b;font-weight:700;"
+                    f"border-left:3px solid #f59e0b;padding:0.4rem 0.75rem;"
+                    f"margin-bottom:0.4rem;background:rgba(245,158,11,0.08);"
+                    f"font-size:0.85rem;'>{s_idx}. {s_name} &nbsp;<span style='font-size:0.75rem;'>Processing...</span></div>",
+                    unsafe_allow_html=True
+                )
+            elif s_idx < active_step:
+                # Done — green check
+                st.markdown(
+                    f"<div style='color:#22c55e;padding:0.4rem 0.75rem;"
+                    f"margin-bottom:0.4rem;font-size:0.85rem;'>&#10003; {s_name}</div>",
+                    unsafe_allow_html=True
+                )
             else:
-                st.markdown(f"<div style='color: #475569; padding: 0.4rem 0.75rem; margin-bottom: 0.4rem; font-size: 0.85rem;'>{i+1}. {s_name}</div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='demo-msg'>STATUS: {msgs[step]}</div>", unsafe_allow_html=True)
+                # Pending — dimmed
+                st.markdown(
+                    f"<div style='color:#475569;padding:0.4rem 0.75rem;"
+                    f"margin-bottom:0.4rem;font-size:0.85rem;'>{s_idx}. {s_name}</div>",
+                    unsafe_allow_html=True
+                )
+
+        display_step = min(active_step, len(msgs) - 1)
+        st.markdown(f"<div class='demo-msg'>STATUS: {msgs[display_step]}</div>", unsafe_allow_html=True)
 
     # LIVE RISK DASHBOARD
     st.markdown("<h3 style='color: white; margin-top: 1.5rem; margin-bottom: 0.75rem;'>Live Risk Dashboard</h3>", unsafe_allow_html=True)
