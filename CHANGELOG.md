@@ -285,3 +285,31 @@
 
 - Intel payload contract drift caused route parsing failures (`alternative_routes` as strings instead of objects), resolved with schema-flexible mapping in Manager.
 - ROI could be inaccurate when Intel omitted direct financial fields, resolved with Analyst fallback for `total_value_at_risk`.
+
+## 23:58
+
+### Features Added
+
+- Upgraded `04_manager_module/manager_agent.py` Telegram dispatch UX into a safer multi-message flow to reduce accidental SOS triggers.
+- Updated Message 1 to include only one inline confirmation button: `✅ Confirm Reroute` (`callback_data: confirm`).
+- Added Message 2 audio dispatch flow using Telegram `sendAudio` for direct MP3 delivery to drivers.
+- Added dedicated Message 3 emergency trigger with a standalone full-width inline button: `🚨 REPORT ACCIDENT (Trigger Swarm)` (`callback_data: accident`).
+- Added `poll_telegram_updates()` offset-aware callback poller to process only new Telegram updates.
+- Added accident callback acknowledgement via `answerCallbackQuery` to stop inline button spinner immediately.
+- Added GPS collection workflow: bot requests location using `request_location=True` reply keyboard after accident callback.
+- Added location listener branch to parse incoming Telegram location payloads (`latitude`, `longitude`) and generate Google Maps deep links.
+- Added Swarm broadcast escalation with live `maps_url` included for immediate fleet situational awareness.
+- Added keyboard cleanup using `ReplyKeyboardRemove` after receiving driver GPS.
+- Added dynamic `shared_exchange/scout_output.json` trigger generation enriched with `latitude`, `longitude`, and `maps_url` for downstream Analyst processing.
+- Added background daemon thread startup for Telegram polling before Manager pipeline loop execution.
+
+### Files Modified
+
+- `04_manager_module/manager_agent.py`
+- `CHANGELOG.md`
+
+### Issues Faced
+
+- Manager script runs from incorrect working directory (`D:\delivery`) caused repeated startup failures; resolved by running from `04_manager_module` and loading `.env` via project-root path.
+- Groq model deprecation (`llama3-8b-8192`) caused runtime crash; resolved by switching to `llama-3.3-70b-versatile`.
+- Telegram callback UX risk (accidental help presses) required redesign to a dedicated emergency trigger message and explicit GPS confirmation step.
