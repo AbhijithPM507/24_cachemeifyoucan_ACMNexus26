@@ -313,35 +313,37 @@ def poll_telegram_updates():
                     if sender_user_id is not None and sender_user_id not in awaiting_location_users:
                         continue
 
-                    # Step 3: Extract latitude/longitude and build maps URL.
-                    location = message.get("location", {})
-                    lat = location.get("latitude")
-                    lon = location.get("longitude")
-                    maps_url = f"https://maps.google.com/?q={lat},{lon}"
+                    # Step 3: Extract latitude/longitude and build Google Maps URL.
+                    lat = message["location"]["latitude"]
+                    lon = message["location"]["longitude"]
+                    maps_url = f"https://www.google.com/maps?q={lat},{lon}"
 
-                    # Step 4A: Broadcast swarm alert with clickable maps URL.
+                    # Step 4A: Broadcast to fleet chat (if configured).
+                    FLEET_CHAT_ID = os.getenv("FLEET_CHAT_ID")
                     swarm_alert = (
                         "🚨 SWARM ALERT 🚨\n\n"
-                        "A driver ahead has reported a severe accident.\n\n"
-                        "⚠️ ALL TRUCKS HALT.\n"
-                        "🔄 Recalculating fleet-wide reroute...\n\n"
-                        f"📍 Reported GPS: {maps_url}"
+                        "A truck ahead is stuck and has triggered an SOS.\n"
+                        f"📍 Live Location: {maps_url}\n\n"
+                        "⚠️ ALL TRUCKS HALT & REROUTE."
                     )
-                    requests.post(
-                        send_message_url,
-                        json={
-                            "chat_id": telegram_chat_id,
-                            "text": swarm_alert,
-                        },
-                        timeout=15,
-                    )
+                    if FLEET_CHAT_ID:
+                        requests.post(
+                            send_message_url,
+                            json={
+                                "chat_id": FLEET_CHAT_ID,
+                                "text": swarm_alert,
+                            },
+                            timeout=15,
+                        )
+                    else:
+                        print("⚠️ [Telegram Poller] FLEET_CHAT_ID missing. Fleet broadcast skipped.")
 
-                    # Step 4B: Remove GPS request keyboard from driver's chat.
+                    # Step 4B: Confirm to driver and remove GPS keyboard.
                     requests.post(
                         send_message_url,
                         json={
                             "chat_id": sender_chat_id,
-                            "text": "✅ GPS received. Swarm alert dispatched.",
+                            "text": "✅ Swarm Alert and live location successfully broadcast to the fleet.",
                             "reply_markup": {"remove_keyboard": True},
                         },
                         timeout=15,
