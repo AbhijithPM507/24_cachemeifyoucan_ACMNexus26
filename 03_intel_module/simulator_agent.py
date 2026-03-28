@@ -49,6 +49,27 @@ ROUTE_DISTANCES_KM = {
 
 DEFAULT_CARGO_TONNES = 5.0
 
+DOWNSTREAM_NETWORK = {
+    "Electronics_Components": [
+        {"facility": "Bangalore Assembly Line 1", "halts_after_hours": 24, "damage_per_hour_inr": 15000},
+        {"facility": "Chennai Retail Distribution", "halts_after_hours": 72, "damage_per_hour_inr": 5000}
+    ],
+    "Medical_Supplies": [
+        {"facility": "Coimbatore General Hospital", "halts_after_hours": 12, "damage_per_hour_inr": 50000},
+        {"facility": "Kochi Pharmacy Central", "halts_after_hours": 8, "damage_per_hour_inr": 35000}
+    ],
+    "Automotive_Parts": [
+        {"facility": "Chennai Toyota Plant", "halts_after_hours": 36, "damage_per_hour_inr": 250000},
+        {"facility": "Bangalore Bosch Facility", "halts_after_hours": 48, "damage_per_hour_inr": 80000}
+    ],
+    "Textiles": [
+        {"facility": "Coimbatore Weaving Mills", "halts_after_hours": 72, "damage_per_hour_inr": 12000}
+    ],
+    "Food_Beverages": [
+        {"facility": "Mysore Snack Factory", "halts_after_hours": 24, "damage_per_hour_inr": 8000}
+    ]
+}
+
 def get_osrm_route(origin_coords, dest_coords, waypoint_coords=None):
     cache_key = f"{origin_coords['lon']},{origin_coords['lat']}|{dest_coords['lon']},{dest_coords['lat']}"
     if waypoint_coords:
@@ -252,6 +273,35 @@ def add_carbon_data(route: dict, cargo_tonnes: float = DEFAULT_CARGO_TONNES) -> 
     
     return route
 
+def simulate_domino_effect(route: dict, cargo_type: str = "Electronics_Components") -> dict:
+    """Calculates downstream factory halt damage based on delivery delay."""
+    eta_days = route.get("mean_time", 2.0)
+    eta_hours = eta_days * 24
+    
+    dependencies = DOWNSTREAM_NETWORK.get(cargo_type, [])
+    
+    failed_nodes = []
+    total_cascading_damage = 0.0
+    
+    for dep in dependencies:
+        if eta_hours > dep["halts_after_hours"]:
+            hours_halted = eta_hours - dep["halts_after_hours"]
+            financial_damage = hours_halted * dep["damage_per_hour_inr"]
+            
+            failed_nodes.append({
+                "facility": dep["facility"],
+                "hours_halted": round(hours_halted, 1),
+                "damage_inr": round(financial_damage, 2)
+            })
+            total_cascading_damage += financial_damage
+    
+    route["cascading_failures"] = failed_nodes
+    route["network_health"] = "CRITICAL 🔴" if failed_nodes else "STABLE 🟢"
+    route["total_cascading_damage_inr"] = round(total_cascading_damage, 2)
+    
+    return route
+
+
 def run_simulator(analyst_output, strategist_output):
     intensity = map_severity(analyst_output.get("severity", "MEDIUM"))
     bias_factor = strategist_output.get("bias_factor", 1.0)
@@ -303,12 +353,13 @@ def run_simulator(analyst_output, strategist_output):
         sim_result = run_monte_carlo_sim(mode, osrm_duration, intensity, bias_factor, target_window=target_window)
         sim_result["live_data"] = live_data
         sim_result = add_carbon_data(sim_result)
+        sim_result = simulate_domino_effect(sim_result)
         results.append(sim_result)
         
         insight = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Simulator: Mode={mode}, mean={sim_result['mean_time']}d, P(arrival)={sim_result['p_arrival_within_target']}, reliability={sim_result['reliability_score']}, green={sim_result['green_score']}"
         agent_thoughts.append(insight)
     
-    system_prompt = "You are a Logistics Simulation Oracle. Run Monte Carlo simulations. Return JSON: {recommended_mode, confidence_score, risk_assessment, reasoning, alternative_modes, best_for}"
+    system_prompt = "You are a Logistics Simulation Oracle. Run Monte Carlo simulations. Return JSON: {recommended_mode, confidence_score, risk_assessment, reasoning, alternative_modes, best_for, route_cities, cargo_weight_tonnes, projected_savings}"
 
     user_prompt = f"Simulate: ANALYST={json.dumps(analyst_output)} STRATEGIST={json.dumps(strategist_output)} OSRM={osrm_data} Results={json.dumps(results)} Modes={priority_modes}"
 
@@ -326,6 +377,9 @@ def run_simulator(analyst_output, strategist_output):
         response_content = chat_completion.choices[0].message.content
         oracle_result = json.loads(response_content)
         
+        oracle_result.setdefault("route_cities", ["Mumbai", "Pune", "Bangalore"])
+        oracle_result.setdefault("cargo_weight_tonnes", 12.0)
+        oracle_result.setdefault("projected_savings", 50000.0)
         final_output = {
             "simulation_results": results,
             "oracle_recommendation": oracle_result,
@@ -351,7 +405,10 @@ def run_simulator(analyst_output, strategist_output):
                 "risk_assessment": "MEDIUM",
                 "reasoning": f"LLM failed, defaulting to: {best_result['mode']}",
                 "alternative_modes": [r["mode"] for r in sorted(results, key=lambda x: x["p_arrival_within_target"], reverse=True)],
-                "best_for": "Standard shipments"
+                "best_for": "Standard shipments",
+                "route_cities": ["Mumbai", "Pune", "Bangalore"],
+                "cargo_weight_tonnes": 12.0,
+                "projected_savings": 50000.0
             },
             "intensity_used": intensity,
             "bias_factor_used": bias_factor,

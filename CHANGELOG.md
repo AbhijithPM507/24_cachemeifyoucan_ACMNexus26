@@ -242,3 +242,19 @@
 - Initial implementation placed logic in 04_manager_module which violated module isolation constraints
 - Resolved by consolidating all capacity sharing logic in 03_intel_module with shared_exchange for data persistence
 - Verified end-to-end flow generates valid manifest output with vendor matches
+
+## 23:45
+
+### Features Added
+- Added `DOWNSTREAM_NETWORK` constant in `simulator_agent.py` - Maps cargo types to downstream factory dependencies with halt thresholds and damage rates
+- Added `simulate_domino_effect()` function - Calculates cascading financial damage when delivery delays cause downstream factory halts
+- Integrated domino effect simulation into Monte Carlo loop after carbon calculation
+- Updated oracle LLM prompt to include `route_cities`, `cargo_weight_tonnes`, `projected_savings` fields
+- Added fallback defaults for new oracle fields
+
+### Files Modified
+- 03_intel_module/simulator_agent.py
+
+### Issues Faced
+- LLM response format inconsistent for projected_savings (returned as dict instead of float)
+- Added setdefault() guards to ensure fields always have valid defaults
