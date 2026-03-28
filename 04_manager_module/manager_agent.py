@@ -31,29 +31,29 @@ POLL_INTERVAL_SECONDS = 2
 # ==========================================
 # FEATURE 1: LIVE TELEGRAM DISPATCHER
 # ==========================================
-def send_telegram_alert(disruption_type, location, route_desc, audio_file_path):
+def send_telegram_alert(disruption_type, location, route_desc, malayalam_audio_path):
     # Always load from project-root .env so it works regardless of execution cwd.
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     dotenv_path = os.path.join(project_root, ".env")
     load_dotenv(dotenv_path=dotenv_path)
 
-    telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
-    telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+    TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-    if not telegram_token or not telegram_chat_id:
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         print("⚠️ [Telegram] TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing in .env. Skipping alert safely.")
         return
 
     # Message 1: Standard dispatch text with confirm button only.
     dispatch_text = (
         "🚨 *URGENT DRIVER DISPATCH* 🚨\n\n"
-        f"*Disruption:* {disruption_type}\n"
-        f"*Location:* {location}\n"
+        f"{disruption_type}\n"
+        f"*Estimated Savings:* {location:.2f}\n"
         f"🛣️ *Assigned Reroute:* {route_desc}\n\n"
         "Please confirm reroute acknowledgement immediately."
     )
 
-    send_message_url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
+    send_message_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     inline_keyboard = {
         "inline_keyboard": [
             [
@@ -84,7 +84,7 @@ def send_telegram_alert(disruption_type, location, route_desc, audio_file_path):
         resp1 = requests.post(
             send_message_url,
             json={
-                "chat_id": telegram_chat_id,
+                "chat_id": TELEGRAM_CHAT_ID,
                 "text": dispatch_text,
                 "parse_mode": "Markdown",
                 "reply_markup": inline_keyboard,
@@ -92,25 +92,28 @@ def send_telegram_alert(disruption_type, location, route_desc, audio_file_path):
             timeout=15,
         )
 
-        # Message 2: Audio file upload.
-        send_audio_url = f"https://api.telegram.org/bot{telegram_token}/sendAudio"
-        if os.path.exists(audio_file_path):
-            with open(audio_file_path, "rb") as audio_file:
-                files = {"audio": audio_file}
-                data = {
-                    "chat_id": telegram_chat_id,
-                    "caption": "Dispatch voice note",
-                }
-                resp2 = requests.post(send_audio_url, data=data, files=files, timeout=30)
-        else:
+        # Message 2: Audio file upload immediately after text alert.
+        url_audio = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendAudio"
+        try:
+            with open(malayalam_audio_path, "rb") as audio_file:
+                resp2 = requests.post(
+                    url_audio,
+                    data={"chat_id": TELEGRAM_CHAT_ID},
+                    files={"audio": audio_file},
+                    timeout=30,
+                )
+        except FileNotFoundError:
             resp2 = None
-            print(f"⚠️ [Telegram] Audio file not found: {audio_file_path}")
+            print(f"⚠️ [Telegram] Audio file not found yet: {malayalam_audio_path}")
+        except OSError as error:
+            resp2 = None
+            print(f"⚠️ [Telegram] Could not open audio file: {error}")
 
         # Message 3: Dedicated accident trigger message.
         resp3 = requests.post(
             send_message_url,
             json={
-                "chat_id": telegram_chat_id,
+                "chat_id": TELEGRAM_CHAT_ID,
                 "text": emergency_reporting_text,
                 "parse_mode": "Markdown",
                 "reply_markup": emergency_keyboard,
@@ -383,13 +386,11 @@ def run_pipeline_once():
 
     # 4. Trigger Advanced Hardware/Mobile Features
     agv_payload = generate_agv_payload(best_route['route_description'])
-    disruption_type = intel_data.get("disruption_type", "Flood")
-    location = intel_data.get("location", "Kochi")
     send_telegram_alert(
-        disruption_type,
-        location,
+        exec_en.strip(),
+        savings,
         best_route['route_description'],
-        MP3_ENGLISH,
+        MP3_MALAYALAM,
     )
 
     # 5. Output Final Dashboard JSON
