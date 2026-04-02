@@ -1,223 +1,347 @@
-# 🚀 Welcome to NEXUS
+# 🚚 Transit
 
-### Conducted by | CLIQUE x ACM MITS |
+## Agentic Supply Chain Swarm with Dynamic Load Pooling
 
-### 📅 March 27 & 28
-
-### 📍 Muthoot Institute of Technology and Science
-
-<p align="center">
-  <img src="template_acm.png" width="500"/>
-  <img src="template_clique.png" width="250"/>
-</p>
+**By CLIQUE x ACM MITS | NEXUS Hackathon 2026**
 
 ---
 
-### 📖 Description
+## Overview
 
-A **16-hour hackathon** across various domains where innovation meets execution. Build, collaborate, and push your limits.
+Transit is an AI-driven supply chain resilience system that autonomously responds to Black Swan disruptions (floods, strikes, accidents, cyclones, bridge closures). Unlike traditional reactive systems, Transit uses a multi-agent swarm architecture that **learns from historical disruptions**, **simulates multiple route alternatives**, and **monetizes empty cargo space** to subsidize rerouting costs.
+
+The system transforms chaos into actionable decisions by combining real-time routing data, Monte Carlo simulations, and LLM-powered strategic reasoning.
 
 ---
 
-## 🧠 Project Details (To be filled by participants)
+## Problem Statement
 
-```md
-### 🏷️ Project Name:
-<Your Project Name>
+Supply chain disruptions cost the global economy billions annually. Traditional systems:
+- React slowly to disruptions
+- Ignore downstream cascade effects
+- Miss opportunities to monetize idle capacity
+- Don't learn from past events
 
-### 🎯 Chosen Domain:
-<One from the given domains>
+Transit addresses these by providing an **antifragile** system that improves with each disruption.
 
-### ❗ Problem Statement:
-<What problem are you solving?>
+---
 
-### 💡 Solution:
-<How does your project solve the problem?>
+## Key Features
+
+### 🤖 Multi-Agent Swarm Architecture
+
+A 4-stage pipeline where each agent specializes in one critical aspect:
+
+| Agent | Module | Role |
+|-------|--------|------|
+| Scout | 01_scout_module | Detects and injects chaos events, parses signals via LLM |
+| Analyst | 02_analyst_module | Quantifies financial risk, filters affected shipments |
+| Strategist | 03_intel_module | Matches disruptions to historical patterns, adjusts bias |
+| Simulator | 03_intel_module | Runs Monte Carlo simulations, calculates ESG metrics |
+
+### 📊 N-Tier Domino Effect Simulation
+
+Predicts cascading financial damage when delivery delays cause downstream factory halts:
+
+```
+Cargo Type → Downstream Facility → Halt Threshold → Financial Damage
+─────────────────────────────────────────────────────────────────────
+Electronics → Bangalore Assembly Line 1 → 24 hours → ₹15,000/hour
+Medical     → Coimbatore Hospital       → 12 hours → ₹50,000/hour
+Automotive  → Chennai Toyota Plant     → 36 hours → ₹250,000/hour
+```
+
+The system calculates:
+- Which facilities will halt based on estimated ETA
+- Hours of production loss
+- Total cascading damage in ₹
+
+### 🌱 ESG & Carbon Tracking
+
+Environmental scoring per transport mode helps optimize for sustainability:
+
+| Mode | CO2 (kg/tonne-km) | Green Score | Use Case |
+|------|-------------------|-------------|----------|
+| Rail | 0.041 | 100 🟢 | Long distance, bulk |
+| Road Bypass | 0.210 | 50 🟡 | Medium routes |
+| Air | 0.602 | 0 🔴 | Emergency only |
+
+### 💰 Dynamic Load Pooling (Capacity Sharing Protocol)
+
+When trucks are rerouted, they often have empty cargo space. Transit matches this space with local vendors along the new route:
+
+**Algorithm:**
+1. Extract route waypoints from approved reroute
+2. Filter vendors by cities on the route
+3. Greedy allocation of space to highest-bid vendors
+4. Generate contracts with payout calculations
+
+**Example Output:**
+```
+Matched Contracts:
+├── Kochi Fresh Agro Exports (Kochi)
+│   ├── Tonnes: 3.5t @ ₹1,500/t = ₹5,250
+├── Thrissur Spice Traders (Thrissur)
+│   ├── Tonnes: 2.0t @ ₹1,800/t = ₹3,600
+└── Total Subsidy: ₹8,850
+```
+
+### 🗺️ Live Routing Intelligence
+
+Real-time road data via OSRM (Open Source Routing Machine):
+- 5-minute caching to reduce API calls
+- Coordinates for 9 major Indian cities
+- Strategic waypoint extraction from LLM suggestions
+- Distance and duration calculations
+
+---
+
+## Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           TRANSIT SYSTEM FLOW                                │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+    ┌─────────────────┐
+    │  Chaos Trigger  │  ← Random disruption events
+    │ (01_scout_module)│    (floods, strikes, accidents)
+    └────────┬────────┘
+             │
+             ▼
+    ┌─────────────────┐
+    │   Scout Agent   │  ← LLM-powered signal parsing
+    │ (01_scout_module)│    Output: location, severity, type
+    └────────┬────────┘
+             │
+             ▼
+    ┌─────────────────┐
+    │  Analyst Agent  │  ← Risk quantification
+    │ (02_analyst_module)│  Output: affected shipments, ₹ at risk
+    └────────┬────────┘
+             │
+             ▼
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │                        INTEL MODULE (03)                              │
+    │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐  │
+    │  │ Strategist      │    │ Simulator       │    │ Capacity Matcher│  │
+    │  │ (Historical     │───▶│ (Monte Carlo +  │───▶│ (Dynamic Load   │  │
+    │  │  Pattern Match) │    │  OSRM + Domino) │    │  Pooling)       │  │
+    │  └─────────────────┘    └─────────────────┘    └─────────────────┘  │
+    └─────────────────────────────────────────────────────────────────────┘
+             │
+             ▼
+    ┌─────────────────┐
+    │   Dashboard UI  │  ← Streamlit control room
+    │ (01_scout_module)│    Real-time metrics & decisions
+    └─────────────────┘
 ```
 
 ---
 
-## 🎯 Hackathon Domains
-
-Participants must choose **one** of the following domains:
-
-1️⃣ Digital Asset Protection
-2️⃣ Smart Supply Chains
-3️⃣ Digital Health & Predictive Care
-4️⃣ Climate Intelligence
-5️⃣ Cybersecurity & Threat Intelligence
-
----
-
-## ⚙️ Hackathon Workflow & Rules
-
-To ensure fairness and transparency, we have designed a structured development and tracking system.
-
----
-
-### 🔗 GitHub Template
-
-👉 **Template Repo:** `{link}`
-
-* All teams must **fork this repository**
-* Fork name must follow:
+## Project Structure
 
 ```
-<TeamId>_<TeamName>_ACMNexus26
-```
-
-* Example:
-
-```
-12_CodeWarriors_ACMNexus26
-```
-
-* You may rename the repository **after the event ends**
-
----
-
-
----
-
-## 👥 Participation Rules
-
-* Team Size: **2–4 members**
-* **Pre-created projects are strictly not allowed**
-* All work must be done **during the hackathon timeframe**
-* Only registered team members must participate
-* Do **not attack or interfere** with college infrastructure/network
-* Follow all instructions from the organizing team
-
----
-
-## 📁 Repository Structure
-
-
-Repository must not be private. The template Repository includes:
-
-```
-AGENTS.md
-README.md
-CHANGELOG.md
-/progress/
+transit/
+├── 01_scout_module/                  # Chaos detection & injection
+│   ├── chaos_trigger.py              # Generates random disruption events
+│   ├── scout_agent.py                # LLM-powered signal parser
+│   └── dashboard.py                  # Streamlit UI dashboard
+│
+├── 02_analyst_module/               # Financial risk assessment
+│   ├── analyst_agent.py              # Risk calculation & shipment filtering
+│   └── shipments.json                # Shipment database (15 shipments)
+│
+├── 03_intel_module/                 # Strategy & simulation
+│   ├── strategist_agent.py           # Historical pattern matching
+│   ├── simulator_agent.py            # Monte Carlo + OSRM + Domino Effect
+│   ├── capacity_matcher.py          # Dynamic Load Pooling algorithm
+│   ├── intel_coordinator.py         # Pipeline orchestrator
+│   ├── past_events.json             # Experience buffer
+│   └── capacity_market_ui.py        # Streamlit sidebar component
+│
+├── 04_manager_module/               # ROI & voice briefing (placeholder)
+│
+├── shared_exchange/                  # JSON data handoffs
+│   ├── signal.json                  # Raw disruption event
+│   ├── scout_output.json             # Scout-processed event
+│   ├── analyst_output.json           # Risk assessment results
+│   ├── intel_output.json             # Strategy + simulation results
+│   ├── local_vendors.json           # Vendor database (10 vendors)
+│   └── open_cargo_manifest.json     # Vendor contracts
+│
+├── progress/                         # Hackathon progress files
+├── CHANGELOG.md                     # Development log
+├── README.md                        # This file
+└── .env                             # API keys (gitignored)
 ```
 
 ---
 
-## ⏱️ Hourly Progress Requirements
+## Tech Stack
 
-Every hour, teams must:
-
-* Make **at least one commit**
-* Add **at least one progress update** inside `/progress/`
-
-Progress can include:
-
-* Screenshots
-* Screen recordings
-* Dataset snapshots
-* Any meaningful proof of work
-
-### 📂 Progress Format
-
-```
-/progress
-1.png
-2.png
-3.png
-```
-
-* Files must be **numbered sequentially**
-* Each file should reflect **actual development progress**
+| Technology | Purpose | Usage |
+|------------|---------|-------|
+| **Python 3.11** | Core language | All agents |
+| **Groq API** | LLM inference | Scout, Strategist, Oracle |
+| **OSRM** | Live routing | Route optimization |
+| **NumPy** | Statistical computing | Monte Carlo simulations |
+| **Streamlit** | Web UI | Dashboard & visualizations |
+| **JSON** | Data persistence | All inter-module communication |
 
 ---
 
-## 📝 Changelog Rules (VERY IMPORTANT)
+## Getting Started
 
-Every commit must be reflected in `CHANGELOG.md`.
+### Prerequisites
+- Python 3.11+
+- Groq API Key (free at [groq.com](https://console.groq.com))
+- Internet connection (for OSRM routing)
 
-You can:
+### Installation
 
-* Update it per commit, OR
-* Update it periodically (but must be complete at the end)
+```bash
+# Clone the repository
+git clone <repo-url>
+cd transit
 
----
+# Install dependencies
+pip install groq numpy requests python-dotenv streamlit
 
-### 📌 Changelog Format
-
-```md
-## HH:MM
-
-### Features Added
-- Added login functionality
-- Implemented API integration
-
-### Files Modified
-- auth.js
-- login.jsx
-
-### Issues Faced
-- Firebase auth errors
-- API timeout issues
+# Configure API key
+cp .env.example .env
+# Edit .env and add:
+# GROQ_API_KEY=your_key_here
 ```
 
----
+### Running the System
 
-💡 Tip:
-Instructions are already included in `AGENTS.md`.
-You can simply prompt it to **"CREATE CHANGELOG"** to follow the format.
+#### Option 1: Dashboard (Recommended)
+```bash
+streamlit run 01_scout_module/dashboard.py
+```
+Opens the Streamlit control room with:
+- Chaos injection button
+- Real-time agent feed
+- ROI metrics
+- Capacity market sidebar
 
----
+#### Option 2: Run Agents Individually
 
-## 📖 Documentation
+**Terminal 1 - Scout & Analyst:**
+```bash
+python 01_scout_module/chaos_trigger.py    # Generate disruption
+python 01_scout_module/scout_agent.py       # Process signal
+python 02_analyst_module/analyst_agent.py   # Assess risk
+```
 
-We have provided:
-
-* Examples
-* Guidelines
-
-Inside:
-
-* `AGENTS.md`
-* `README.md`
-
-Please follow them strictly.
-
----
-
-## 🔍 Monitoring & Verification
-
-* Random checks will be conducted during the hackathon
-* Organizers may:
-
-  * Inspect commit history
-  * Review changelog consistency
-  * Verify progress evidence
+**Terminal 2 - Intel:**
+```bash
+python 03_intel_module/intel_coordinator.py # Run full pipeline
+```
 
 ---
 
-## 👨‍💻 Team Collaboration Rules
+## Data Schemas
 
-* All members must be added as **collaborators**
-* By the end of the hackathon:
+### Input: signal.json
+```json
+{
+  "id": "EVT-1234",
+  "event": "flash flood",
+  "location": "Kochi",
+  "timestamp": "2026-03-28T10:30:00Z",
+  "source": "IMD_alert"
+}
+```
 
-  * **Each member must have at least one commit**
+### Output: intel_output.json
+```json
+{
+  "strategic_lesson": "Last time flood at Kochi...",
+  "recommended_route": ["Mumbai", "Pune", "Bangalore"],
+  "recommended_mode": "Air",
+  "projected_savings": 75000.0,
+  "capacity_subsidy_earned_inr": 8850.0,
+  "total_roi_with_subsidy": 83850.0,
+  "simulation_results": [
+    {
+      "mode": "Air",
+      "mean_time": 0.5,
+      "reliability_score": 0.85,
+      "network_health": "STABLE 🟢",
+      "total_cascading_damage_inr": 0
+    }
+  ]
+}
+```
+
+### Capacity Market: open_cargo_manifest.json
+```json
+{
+  "status": "success",
+  "route_waypoints": ["Kochi", "Thrissur", "Bangalore"],
+  "total_space_sold_tonnes": 8.0,
+  "total_subsidy_earned_inr": 8850.0,
+  "matched_contracts": [
+    {"vendor_name": "Kochi Fresh Agro", "city": "Kochi", "tonnes_matched": 3.5, "payout_inr": 5250}
+  ]
+}
+```
 
 ---
 
-## ⚠️ Disqualification Criteria
+## Configuration
 
-* Use of **pre-built / pre-developed projects**
-* Fake or manipulated commit history
-* Missing hourly commits or progress updates
-* Incomplete or inconsistent changelog
+### Environment Variables (.env)
+```
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+### Route Distances (km)
+```python
+ROUTE_DISTANCES_KM = {
+    "Air": 450,
+    "Rail": 620,
+    "Road_bypass": 580,
+    "Road": 550
+}
+```
+
+### Emissions (kg CO2 per tonne-km)
+```python
+EMISSIONS_KG_PER_TONNE_KM = {
+    "Air": 0.602,
+    "Rail": 0.041,
+    "Road_bypass": 0.210,
+    "Road": 0.210
+}
+```
+
+### Downstream Network (Domino Effect)
+```python
+DOWNSTREAM_NETWORK = {
+    "Electronics_Components": [
+        {"facility": "Bangalore Assembly Line 1", "halts_after_hours": 24, "damage_per_hour_inr": 15000}
+    ],
+    "Medical_Supplies": [
+        {"facility": "Coimbatore Hospital", "halts_after_hours": 12, "damage_per_hour_inr": 50000}
+    ]
+}
+```
 
 ---
 
-## 🏁 Final Note
+## License
 
-Focus on building, learning, and enjoying the experience.
+This project was built during NEXUS 2026 Hackathon by CLIQUE x ACM MITS.
 
 ---
 
-🔥 **Build. Break. Innovate. See you at NEXUS.**
+## Team
+
+**CLIQUE x ACM MITS**
+
+---
+
+**Build. Break. Innovate.**
